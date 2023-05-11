@@ -1,0 +1,13 @@
+name = "MatricesForHomalg"
+uuid = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
+authors = ["Mohamed Barakat <mohamed.barakat@uni-siegen.de>", "Johanna Knecht <johanna.knecht@student.uni-siegen.de>"]
+version = "0.0.1"
+
+[compat]
+julia = "1.9"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
