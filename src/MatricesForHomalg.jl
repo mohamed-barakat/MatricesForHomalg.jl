@@ -1,5 +1,5 @@
 module MatricesForHomalg
 
-# Write your package code here.
+# Matrices for the homalg project
 
 end
