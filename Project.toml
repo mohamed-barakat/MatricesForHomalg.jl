@@ -1,9 +1,13 @@
 name = "MatricesForHomalg"
 uuid = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
 authors = ["Mohamed Barakat <mohamed.barakat@uni-siegen.de>", "Johanna Knecht <johanna.knecht@student.uni-siegen.de>"]
-version = "0.0.1"
+version = "0.0.2"
+
+[deps]
+AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
 
 [compat]
+AbstractAlgebra = "^0.30.2"
 julia = "1.9"
 
 [extras]
