@@ -120,23 +120,23 @@ export IsOne, IsZero
 ## Attributes of homalg matrices
 
 """
-    NrRows(mat)
+    NumberRows(mat)
 
 The number of rows of the matrix mat
 """
-function NrRows(mat)::BigInt
+function NumberRows(mat)::BigInt
     return AbstractAlgebra.nrows(mat)
 end
 
 """
-    NrColumns(mat)
+    NumberColumns(mat)
 
 The number of columns of the matrix mat
 """
-function NrColumns(mat)::BigInt
+function NumberColumns(mat)::BigInt
     return AbstractAlgebra.ncols(mat)
 end
 
-export NrRows, NrColumns
+export NumberRows, NumberColumns
 
 end
