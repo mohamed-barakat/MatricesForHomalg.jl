@@ -115,7 +115,34 @@ function IsZero(mat)::Bool
     return AbstractAlgebra.iszero(mat)
 end
 
-export IsOne, IsZero
+"""
+    IsEmptyMatrix(mat)
+
+Return true if mat does not contain any entry, otherwise false
+"""
+function IsEmptyMatrix(mat)::Bool
+    return isempty(mat)
+end
+
+"""
+    IsSymmetricMatrix(mat)
+
+Return true if the matrix mat is symmetric with respect to its main diagonal, otherwise false
+"""
+function IsSymmetricMatrix(mat)::Bool
+    return AbstractAlgebra.is_symmetric(mat)
+end
+
+"""
+    IsUpperTriangularMatrix(mat)
+
+Return true if mat is an upper triangular matrix, otherwise false
+"""
+function IsUpperTriangularMatrix(mat)::Bool
+    return AbstractAlgebra.is_upper_triangular(mat)
+end
+
+export IsOne, IsZero, IsEmptyMatrix, IsSymmetricMatrix, IsUpperTriangularMatrix
 
 ## Attributes of homalg matrices
 
