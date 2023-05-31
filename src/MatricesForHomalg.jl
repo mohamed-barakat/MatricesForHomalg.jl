@@ -18,6 +18,12 @@ TypeOfMatrixForHomalg = AbstractAlgebra.Generic.MatSpaceElem
     HomalgMatrix(L, r, c, R)
 
 Construct a (r x c)-matrix over the ring R with L as list of entries
+
+```jldoctest
+julia> mat = HomalgMatrix([1,2,3,4,5,6], 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+```
 """
 function HomalgMatrix(entries, r, c, R)::TypeOfMatrixForHomalg
     return matrix(R, r, c, entries)

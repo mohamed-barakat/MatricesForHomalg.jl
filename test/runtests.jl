@@ -1,6 +1,8 @@
 using MatricesForHomalg
 using Test
+using Documenter
 
-@testset "MatricesForHomalg.jl" begin
-    # Write your tests here.
-end
+DocMeta.setdocmeta!(MatricesForHomalg, :DocTestSetup, :(using MatricesForHomalg); recursive = true)
+
+include("constructors.jl")
+include("testmanual.jl")
