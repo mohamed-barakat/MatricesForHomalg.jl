@@ -147,6 +147,23 @@ end
     R * mat
 
 Rewrite the matrix mat over the ring R (if possible)
+
+```jldoctest
+julia> mat = HomalgMatrix([1,2,3,4,5,6], 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> QQ * mat
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+
+julia> qmat = QQ * mat
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+
+julia> ZZ * qmat == mat
+true
+```
 """
 Base.:*(R, mat) = AbstractAlgebra.change_base_ring(R, mat)
 
