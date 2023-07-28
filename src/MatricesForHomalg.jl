@@ -290,7 +290,7 @@ export NumberRows, NumberColumns
 """
     TransposedMatrix(mat)
 
-Return transposed matrix of mat
+Return the transposed matrix of mat
 
 ```jldoctest
 julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
