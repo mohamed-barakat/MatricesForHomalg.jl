@@ -290,7 +290,7 @@ export NumberRows, NumberColumns
 """
     TransposedMatrix(mat)
 
-Return transposed matrix of mat
+Return the transposed matrix of mat
 
 ```jldoctest
 julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
@@ -306,6 +306,75 @@ julia> TransposedMatrix(mat)
 function TransposedMatrix(mat)::TypeOfMatrixForHomalg
     return Base.transpose(mat)
 end
+
+"""
+    BasisOfRows(mat)
+
+Return the triangular form of mat
+
+```jldoctest
+julia> mat = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> BasisOfRows(mat)
+[1   2   3]
+[0   3   6]
+
+julia> mat = HomalgMatrix(1:9, 3, 3, QQ)
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+[7//1   8//1   9//1]
+
+julia> BasisOfRows(mat)
+[1//1   0//1   -1//1]
+[0//1   1//1    2//1]
+```
+"""
+function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::TypeOfMatrixForHomalg
+    hnf = AbstractAlgebra.hnf(mat)
+    rank = AbstractAlgebra.rank(hnf)
+    return hnf[1:rank, :]
+end
+
+function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::TypeOfMatrixForHomalg
+    rank, rref = AbstractAlgebra.rref(mat)
+    return rref[1:rank, :]
+end
+
+"""
+    BasisOfColumns(mat)
+
+Return the triangular form of mat
+
+```jldoctest
+julia> mat = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> BasisOfColumns(mat)
+[1   0]
+[1   3]
+[1   6]
+
+julia> mat = HomalgMatrix(1:9, 3, 3, QQ)
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+[7//1   8//1   9//1]
+
+julia> BasisOfColumns(mat)
+[ 1//1   0//1]
+[ 0//1   1//1]
+[-1//1   2//1]
+```
+"""
+function BasisOfColumns(mat)::TypeOfMatrixForHomalg
+    return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
+end
+
+export BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
 
