@@ -250,6 +250,31 @@ export IsOne, IsZero, IsEmptyMatrix, IsSymmetricMatrix
 ## Attributes of homalg matrices
 
 """
+    HomalgRing(mat)
+
+Return the ring underlying the matrix mat.
+
+```jldoctest
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> HomalgRing(mat)
+Integers
+
+julia> mat = HomalgMatrix(1:6, 2, 3, QQ)
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+
+julia> HomalgRing(mat)
+Rationals
+```
+"""
+function HomalgRing(mat)
+    return AbstractAlgebra.base_ring(mat)
+end
+
+"""
     NumberRows(mat)
 
 The number of rows of the matrix mat
@@ -284,8 +309,6 @@ julia> NumberColumns(mat)
 function NumberColumns(mat)::BigInt
     return AbstractAlgebra.ncols(mat)
 end
-
-export NumberRows, NumberColumns
 
 """
     TransposedMatrix(mat)
@@ -374,7 +397,7 @@ function BasisOfColumns(mat)::TypeOfMatrixForHomalg
     return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
 end
 
-export BasisOfRows, BasisOfColumns
+export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
 
@@ -415,6 +438,6 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export TransposedMatrix, KroneckerMat
+export KroneckerMat
 
 end
