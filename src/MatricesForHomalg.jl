@@ -287,4 +287,65 @@ end
 
 export NumberRows, NumberColumns
 
+"""
+    TransposedMatrix(mat)
+
+Return transposed matrix of mat
+
+```jldoctest
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> TransposedMatrix(mat)
+[1   4]
+[2   5]
+[3   6]
+```
+"""
+function TransposedMatrix(mat)::TypeOfMatrixForHomalg
+    return Base.transpose(mat)
+end
+
+## Operations of homalg matrices
+
+"""
+    KroneckerMat(mat1, mat2)
+
+Return the Kronecker (or tensor) product of the two homalg matrices mat1 and mat2.
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> KroneckerMat(mat1, mat2)
+[ 2    3    4    6    6    9]
+[ 4    5    8   10   12   15]
+[ 6    7   12   14   18   21]
+[ 8   12   10   15   12   18]
+[16   20   20   25   24   30]
+[24   28   30   35   36   42]
+
+julia> KroneckerMat(mat2, mat1)
+[ 2    4    6    3    6    9]
+[ 8   10   12   12   15   18]
+[ 4    8   12    5   10   15]
+[16   20   24   20   25   30]
+[ 6   12   18    7   14   21]
+[24   30   36   28   35   42]
+
+```
+"""
+function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
+    return AbstractAlgebra.kronecker_product(mat1, mat2)
+end
+
+export TransposedMatrix, KroneckerMat
+
 end
