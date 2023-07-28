@@ -250,6 +250,31 @@ export IsOne, IsZero, IsEmptyMatrix, IsSymmetricMatrix
 ## Attributes of homalg matrices
 
 """
+    HomalgRing(mat)
+
+Return the ring underlying the matrix mat.
+
+```jldoctest
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> HomalgRing(mat)
+Integers
+
+julia> mat = HomalgMatrix(1:6, 2, 3, QQ)
+[1//1   2//1   3//1]
+[4//1   5//1   6//1]
+
+julia> HomalgRing(mat)
+Rationals
+```
+"""
+function HomalgRing(mat)
+    return AbstractAlgebra.base_ring(mat)
+end
+
+"""
     NumberRows(mat)
 
 The number of rows of the matrix mat
@@ -284,8 +309,6 @@ julia> NumberColumns(mat)
 function NumberColumns(mat)::BigInt
     return AbstractAlgebra.ncols(mat)
 end
-
-export NumberRows, NumberColumns
 
 """
     TransposedMatrix(mat)
@@ -374,9 +397,64 @@ function BasisOfColumns(mat)::TypeOfMatrixForHomalg
     return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
 end
 
-export BasisOfRows, BasisOfColumns
+export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
+
+"""
+    UnionOfRows(R, nr_cols, list)
+
+Return the matrices in list stacked, where all of them have same number of columns nr_cols.
+
+```jldoctest
+julia> UnionOfRows(ZZ, 3, [])
+0 by 3 empty matrix
+
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> UnionOfRows(ZZ, 3, [mat, mat])
+[1   2   3]
+[4   5   6]
+[1   2   3]
+[4   5   6]
+```
+"""
+function UnionOfRows(R, nr_cols, list)::TypeOfMatrixForHomalg
+    if length(list) == 0
+        return HomalgZeroMatrix(0, nr_cols, R)
+    end
+
+    return vcat(list...)
+end
+
+"""
+    UnionOfColumns(R, nr_rows, list)
+
+Return the matrices in list augmented, where all of them have same number of rows nr_rows.
+.
+
+```jldoctest
+julia> UnionOfColumns(ZZ, 2, [])
+2 by 0 empty matrix
+
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> UnionOfColumns(ZZ, 2, [mat, mat])
+[1   2   3   1   2   3]
+[4   5   6   4   5   6]
+```
+"""
+function UnionOfColumns(R, nr_rows, list)::TypeOfMatrixForHomalg
+    if length(list) == 0
+        return HomalgZeroMatrix(nr_rows, 0, R)
+    end
+
+    return hcat(list...)
+end
 
 """
     KroneckerMat(mat1, mat2)
@@ -415,6 +493,6 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export TransposedMatrix, KroneckerMat
+export UnionOfRows, UnionOfColumns, KroneckerMat
 
 end
