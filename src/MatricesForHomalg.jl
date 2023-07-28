@@ -402,6 +402,61 @@ export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, BasisOfRows, Bas
 ## Operations of homalg matrices
 
 """
+    UnionOfRows(R, nr_cols, list)
+
+Return the matrices in list stacked, where all of them have same number of columns nr_cols.
+
+```jldoctest
+julia> UnionOfRows(ZZ, 3, [])
+0 by 3 empty matrix
+
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> UnionOfRows(ZZ, 3, [mat, mat])
+[1   2   3]
+[4   5   6]
+[1   2   3]
+[4   5   6]
+```
+"""
+function UnionOfRows(R, nr_cols, list)::TypeOfMatrixForHomalg
+    if length(list) == 0
+        return HomalgZeroMatrix(0, nr_cols, R)
+    end
+
+    return vcat(list...)
+end
+
+"""
+    UnionOfColumns(R, nr_rows, list)
+
+Return the matrices in list augmented, where all of them have same number of rows nr_rows.
+.
+
+```jldoctest
+julia> UnionOfColumns(ZZ, 2, [])
+2 by 0 empty matrix
+
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> UnionOfColumns(ZZ, 2, [mat, mat])
+[1   2   3   1   2   3]
+[4   5   6   4   5   6]
+```
+"""
+function UnionOfColumns(R, nr_rows, list)::TypeOfMatrixForHomalg
+    if length(list) == 0
+        return HomalgZeroMatrix(nr_rows, 0, R)
+    end
+
+    return hcat(list...)
+end
+
+"""
     KroneckerMat(mat1, mat2)
 
 Return the Kronecker (or tensor) product of the two homalg matrices mat1 and mat2.
@@ -438,6 +493,6 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export KroneckerMat
+export UnionOfRows, UnionOfColumns, KroneckerMat
 
 end
