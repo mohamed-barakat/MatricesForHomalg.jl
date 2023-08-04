@@ -331,6 +331,62 @@ function TransposedMatrix(mat)::TypeOfMatrixForHomalg
 end
 
 """
+    ConvertMatrixToRow(mat)
+
+Unfold the matrix M row-wise into a row.
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> ConvertMatrixToRow(mat)
+[2   3   4   5   6   7]
+
+```
+"""
+function ConvertMatrixToRow(mat)::TypeOfMatrixForHomalg
+    union_rows = HomalgZeroMatrix(1, 0, HomalgRing(mat))
+    for i = 1:(NumberRows(mat))
+        row = mat[i:i, :]
+        union_rows = UnionOfColumns(HomalgRing(mat),1, [union_rows, row])
+    end
+    return union_rows
+end
+
+"""
+    ConvertMatrixToColumn(mat)
+
+Unfold the matrix M column-wise into a column.
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> ConvertMatrixToColumn(mat)
+[2]
+[4]
+[6]
+[3]
+[5]
+[7]
+
+```
+"""
+function ConvertMatrixToColumn(mat)::TypeOfMatrixForHomalg
+    union_columns = HomalgZeroMatrix(0, 1, HomalgRing(mat))
+    #Problem: NumberColumns liefert falschen Datentyp
+    for i = 1:(NumberColumns(mat))
+        column = mat[:, i:i]
+        union_columns = UnionOfRows(HomalgRing(mat),1, [union_columns, column])
+    end
+    return union_columns
+end
+
+"""
     BasisOfRows(mat)
 
 Return the triangular form of mat
@@ -397,7 +453,7 @@ function BasisOfColumns(mat)::TypeOfMatrixForHomalg
     return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
 end
 
-export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, BasisOfRows, BasisOfColumns
+export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn, BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
 
