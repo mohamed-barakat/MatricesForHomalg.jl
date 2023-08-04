@@ -387,6 +387,39 @@ function ConvertMatrixToColumn(mat)::TypeOfMatrixForHomalg
 end
 
 """
+    RowReducedEchelonForm(mat)
+
+Return the reduced row-echelon form of the matrix mat.
+
+```jldoctest
+julia> mat = HomalgMatrix(reverse(1:9), 3, 3, ZZ)
+[9   8   7]
+[6   5   4]
+[3   2   1]
+
+julia> RowReducedEchelonForm(mat)
+([3 0 -3; 0 1 2; 0 0 0], 2)
+
+julia> mat = HomalgMatrix(reverse(1:9), 3, 3, QQ)
+[9//1   8//1   7//1]
+[6//1   5//1   4//1]
+[3//1   2//1   1//1]
+
+julia> RowReducedEchelonForm(mat)
+([1 0 -1; 0 1 2; 0 0 0], 2)
+"""
+function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::Tuple{TypeOfMatrixForHomalg, Int64}
+    hnf = AbstractAlgebra.hnf(mat)
+    rank = AbstractAlgebra.rank(hnf)
+    return hnf, rank
+end
+
+function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::Tuple{TypeOfMatrixForHomalg, Int64}
+    rank, rref = AbstractAlgebra.rref(mat)
+    return rref, rank
+end
+
+"""
     BasisOfRows(mat)
 
 Return the triangular form of mat
@@ -411,14 +444,8 @@ julia> BasisOfRows(mat)
 [0//1   1//1    2//1]
 ```
 """
-function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::TypeOfMatrixForHomalg
-    hnf = AbstractAlgebra.hnf(mat)
-    rank = AbstractAlgebra.rank(hnf)
-    return hnf[1:rank, :]
-end
-
-function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::TypeOfMatrixForHomalg
-    rank, rref = AbstractAlgebra.rref(mat)
+function BasisOfRows(mat)::TypeOfMatrixForHomalg
+    rref, rank = RowReducedEchelonForm(mat)
     return rref[1:rank, :]
 end
 
@@ -453,7 +480,7 @@ function BasisOfColumns(mat)::TypeOfMatrixForHomalg
     return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
 end
 
-export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn, BasisOfRows, BasisOfColumns
+export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn, RowReducedEchelonForm, BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
 
