@@ -636,6 +636,88 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows
+"""
+    RightDivide(mat2, mat1)
+
+Returns: a homalg matrix or fail
+
+Let mat2 and mat1 be matrices having the same number of columns and defined over the same ring.
+The matrix RightDivide(mat2, mat1) is a particular solution of the inhomogeneous (one sided) linear system of equations X(mat1)=(mat2) in case it is solvable.
+Otherwise fail is returned. The name RightDivide suggests "X=(mat2)(mat1^(-1))".
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> RightDivide(mat2, mat2)
+[ 1   0   0]
+[ 0   1   0]
+[-1   2   0]
+
+julia> RightDivide(mat2, mat1)
+"fail"
+```
+"""
+function RightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return AbstractAlgebra.solve_left(mat1, mat2)
+    catch y
+        return "fail"
+    end
+end
+
+"""
+    LeftDivide(mat1, mat2)
+
+Returns: a homalg matrix or fail
+
+Let mat1 and mat2 be matrices having the same number of rows and defined over the same ring.
+The matrix LeftDivide(mat1, mat2) is a particular solution of the inhomogeneous (one sided) linear system of equations (mat1)X=(mat2) in case it is solvable.
+Otherwise fail is returned. The name LeftDivide suggests "X=((mat1)^-1)(mat2)".
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> mat3 = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
+[1   0]
+[0   0]
+[0   0]
+
+julia> LeftDivide(mat2, mat2)
+[1   0]
+[0   1]
+
+julia> LeftDivide(mat1, mat2)
+[0   -1]
+[1    2]
+
+julia> LeftDivide(mat3, mat2)
+"fail"
+```
+"""
+function LeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return AbstractAlgebra.solve(mat1, mat2)
+    catch y
+        return "fail"
+    end
+end
+
+export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows, RightDivide, LeftDivide
 
 end
