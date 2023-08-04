@@ -288,7 +288,7 @@ julia> NumberRows(mat)
 2
 ```
 """
-function NumberRows(mat)::BigInt
+function NumberRows(mat)::Int64
     return AbstractAlgebra.nrows(mat)
 end
 
@@ -306,7 +306,7 @@ julia> NumberColumns(mat)
 3
 ```
 """
-function NumberColumns(mat)::BigInt
+function NumberColumns(mat)::Int64
     return AbstractAlgebra.ncols(mat)
 end
 
@@ -328,6 +328,95 @@ julia> TransposedMatrix(mat)
 """
 function TransposedMatrix(mat)::TypeOfMatrixForHomalg
     return Base.transpose(mat)
+end
+
+"""
+    ConvertMatrixToRow(mat)
+
+Unfold the matrix M row-wise into a row.
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> ConvertMatrixToRow(mat)
+[2   3   4   5   6   7]
+
+```
+"""
+function ConvertMatrixToRow(mat)::TypeOfMatrixForHomalg
+    union_rows = HomalgZeroMatrix(1, 0, HomalgRing(mat))
+    for i = 1:(NumberRows(mat))
+        row = mat[i:i, :]
+        union_rows = UnionOfColumns(HomalgRing(mat),1, [union_rows, row])
+    end
+    return union_rows
+end
+
+"""
+    ConvertMatrixToColumn(mat)
+
+Unfold the matrix M column-wise into a column.
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> ConvertMatrixToColumn(mat)
+[2]
+[4]
+[6]
+[3]
+[5]
+[7]
+
+```
+"""
+function ConvertMatrixToColumn(mat)::TypeOfMatrixForHomalg
+    union_columns = HomalgZeroMatrix(0, 1, HomalgRing(mat))
+    #Problem: NumberColumns liefert falschen Datentyp
+    for i = 1:(NumberColumns(mat))
+        column = mat[:, i:i]
+        union_columns = UnionOfRows(HomalgRing(mat),1, [union_columns, column])
+    end
+    return union_columns
+end
+
+"""
+    RowReducedEchelonForm(mat)
+
+Return the reduced row-echelon form of the matrix mat.
+
+```jldoctest
+julia> mat = HomalgMatrix(reverse(1:9), 3, 3, ZZ)
+[9   8   7]
+[6   5   4]
+[3   2   1]
+
+julia> RowReducedEchelonForm(mat)
+([3 0 -3; 0 1 2; 0 0 0], 2)
+
+julia> mat = HomalgMatrix(reverse(1:9), 3, 3, QQ)
+[9//1   8//1   7//1]
+[6//1   5//1   4//1]
+[3//1   2//1   1//1]
+
+julia> RowReducedEchelonForm(mat)
+([1 0 -1; 0 1 2; 0 0 0], 2)
+"""
+function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::Tuple{TypeOfMatrixForHomalg, Int64}
+    hnf = AbstractAlgebra.hnf(mat)
+    rank = AbstractAlgebra.rank(hnf)
+    return hnf, rank
+end
+
+function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::Tuple{TypeOfMatrixForHomalg, Int64}
+    rank, rref = AbstractAlgebra.rref(mat)
+    return rref, rank
 end
 
 """
@@ -355,14 +444,8 @@ julia> BasisOfRows(mat)
 [0//1   1//1    2//1]
 ```
 """
-function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::TypeOfMatrixForHomalg
-    hnf = AbstractAlgebra.hnf(mat)
-    rank = AbstractAlgebra.rank(hnf)
-    return hnf[1:rank, :]
-end
-
-function BasisOfRows(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::TypeOfMatrixForHomalg
-    rank, rref = AbstractAlgebra.rref(mat)
+function BasisOfRows(mat)::TypeOfMatrixForHomalg
+    rref, rank = RowReducedEchelonForm(mat)
     return rref[1:rank, :]
 end
 
@@ -397,7 +480,7 @@ function BasisOfColumns(mat)::TypeOfMatrixForHomalg
     return TransposedMatrix(BasisOfRows(TransposedMatrix(mat)))
 end
 
-export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, BasisOfRows, BasisOfColumns
+export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn, RowReducedEchelonForm, BasisOfRows, BasisOfColumns
 
 ## Operations of homalg matrices
 
@@ -457,6 +540,66 @@ function UnionOfColumns(R, nr_rows, list)::TypeOfMatrixForHomalg
 end
 
 """
+    CertainColumns(mat, list)
+
+Return the matrix of which the i-th column is the k-th column of the homalg matrix M, where k=list[i].
+
+```jldoctest
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> CertainColumns(mat, [2, 2, 1])
+[2   2   1]
+[5   5   4]
+
+julia> CertainColumns(mat, [])
+2 by 0 empty matrix
+
+```
+"""
+function CertainColumns(mat, list)::TypeOfMatrixForHomalg
+    nr_rows = NumberRows(mat)
+    union_columns = HomalgZeroMatrix(nr_rows, 0, HomalgRing(mat))
+    for i = 1:(length(list))
+        column = mat[:, list[i]:list[i]]
+        union_columns = UnionOfColumns(HomalgRing(mat), nr_rows,[union_columns, column])
+    end
+    return union_columns
+end
+
+"""
+    CertainRows(mat, list)
+
+Return the matrix of which the i-th row is the k-th row of the homalg matrix M, where k=list[i].
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> CertainRows(mat, [2, 2, 1])
+[4   5]
+[4   5]
+[2   3]
+
+julia> CertainRows(mat, [])
+0 by 2 empty matrix
+
+```
+"""
+function CertainRows(mat, list)::TypeOfMatrixForHomalg
+    nr_cols = NumberColumns(mat)
+    union_rows = HomalgZeroMatrix(0, nr_cols, HomalgRing(mat))
+    for i = 1:(length(list))
+        row = mat[list[i]:list[i], :]
+        union_rows = UnionOfRows(HomalgRing(mat), nr_cols,[union_rows, row])
+    end
+    return union_rows
+end
+
+"""
     KroneckerMat(mat1, mat2)
 
 Return the Kronecker (or tensor) product of the two homalg matrices mat1 and mat2.
@@ -493,6 +636,178 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export UnionOfRows, UnionOfColumns, KroneckerMat
+"""
+    RightDivide(mat2, mat1)
+
+Returns: a homalg matrix or fail
+
+Let mat2 and mat1 be matrices having the same number of columns and defined over the same ring.
+The matrix RightDivide(mat2, mat1) is a particular solution of the inhomogeneous (one sided) linear system of equations X(mat1)=(mat2) in case it is solvable.
+Otherwise fail is returned. The name RightDivide suggests "X=(mat2)(mat1^(-1))".
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> RightDivide(mat2, mat2)
+[ 1   0   0]
+[ 0   1   0]
+[-1   2   0]
+
+julia> RightDivide(mat2, mat1)
+"fail"
+```
+"""
+function RightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return AbstractAlgebra.solve_left(mat1, mat2)
+    catch y
+        return "fail"
+    end
+end
+
+"""
+    LeftDivide(mat1, mat2)
+
+Returns: a homalg matrix or fail
+
+Let mat1 and mat2 be matrices having the same number of rows and defined over the same ring.
+The matrix LeftDivide(mat1, mat2) is a particular solution of the inhomogeneous (one sided) linear system of equations (mat1)X=(mat2) in case it is solvable.
+Otherwise fail is returned. The name LeftDivide suggests "X=((mat1)^-1)(mat2)".
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> mat3 = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
+[1   0]
+[0   0]
+[0   0]
+
+julia> LeftDivide(mat2, mat2)
+[1   0]
+[0   1]
+
+julia> LeftDivide(mat1, mat2)
+[0   -1]
+[1    2]
+
+julia> LeftDivide(mat3, mat2)
+"fail"
+```
+"""
+function LeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return AbstractAlgebra.solve(mat1, mat2)
+    catch y
+        return "fail"
+    end
+end
+
+"""
+    DecideZeroRows(mat1, mat2)
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> reduced_mat1 = DecideZeroRows(mat2, mat1)
+[0   1]
+[0   1]
+[0   1]
+
+julia> RightDivide(mat2, mat1)
+"fail"
+
+julia> RightDivide(mat2 - reduced_mat1, mat1)
+[-1   1   0]
+[-2   2   0]
+[-3   3   0]
+
+julia> DecideZeroRows(mat1, mat1)
+[0   0]
+[0   0]
+[0   0]
+
+julia> mat3 = HomalgMatrix([4, 6, 2, 2], 2, 2, ZZ)
+[4   6]
+[2   2]
+
+julia> DecideZeroRows(mat3, mat1)
+[0   0]
+[0   0]
+
+julia> DecideZeroRows(mat1, mat3)
+[1   0]
+[1   0]
+[1   0]
+```
+"""
+function DecideZeroRows(B,A)
+    #A,B are defined over the same ring
+    ring = HomalgRing(B)
+
+    nr_rows_A = NumberRows(A)
+    nr_rows_B = NumberRows(B)
+
+    #A,B have the same number of columns
+    nr_cols = NumberColumns(B)
+
+    null_mat_a = HomalgZeroMatrix(nr_rows_A, nr_rows_B, ring)
+    ident_mat_b = HomalgIdentityMatrix(nr_rows_B, ring)
+
+    list_of_matrices = [UnionOfRows(ring, nr_rows_B, [ident_mat_b, null_mat_a]), UnionOfRows(ring, nr_cols,[B, A])]
+    temp_mat = UnionOfColumns(ring, nr_rows_B + nr_rows_A,list_of_matrices)
+    resulting_mat = BasisOfRows(temp_mat)
+
+    return resulting_mat[1:nr_rows_B, nr_rows_B+1:nr_rows_B+nr_cols]
+end
+
+"""
+    DecideZeroRows(mat1, mat2)
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat3 = HomalgMatrix([3, 1, 7, 1, 11, 1], 3, 2, ZZ)
+[ 3   1]
+[ 7   1]
+[11   1]
+
+julia> DecideZeroColumns(mat3, mat1)
+[0   0]
+[0   0]
+[0   0]
+```
+"""
+function DecideZeroColumns(B, A)
+    return TransposedMatrix(DecideZeroRows(TransposedMatrix(B), TransposedMatrix(A)))
+end
+
+export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows, RightDivide, LeftDivide, DecideZeroRows, DecideZeroColumns
 
 end
