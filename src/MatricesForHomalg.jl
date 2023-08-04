@@ -540,6 +540,66 @@ function UnionOfColumns(R, nr_rows, list)::TypeOfMatrixForHomalg
 end
 
 """
+    CertainColumns(mat, list)
+
+Return the matrix of which the i-th column is the k-th column of the homalg matrix M, where k=list[i].
+
+```jldoctest
+julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
+[1   2   3]
+[4   5   6]
+
+julia> CertainColumns(mat, [2, 2, 1])
+[2   2   1]
+[5   5   4]
+
+julia> CertainColumns(mat, [])
+2 by 0 empty matrix
+
+```
+"""
+function CertainColumns(mat, list)::TypeOfMatrixForHomalg
+    nr_rows = NumberRows(mat)
+    union_columns = HomalgZeroMatrix(nr_rows, 0, HomalgRing(mat))
+    for i = 1:(length(list))
+        column = mat[:, list[i]:list[i]]
+        union_columns = UnionOfColumns(HomalgRing(mat), nr_rows,[union_columns, column])
+    end
+    return union_columns
+end
+
+"""
+    CertainRows(mat, list)
+
+Return the matrix of which the i-th row is the k-th row of the homalg matrix M, where k=list[i].
+
+```jldoctest
+julia> mat = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> CertainRows(mat, [2, 2, 1])
+[4   5]
+[4   5]
+[2   3]
+
+julia> CertainRows(mat, [])
+0 by 2 empty matrix
+
+```
+"""
+function CertainRows(mat, list)::TypeOfMatrixForHomalg
+    nr_cols = NumberColumns(mat)
+    union_rows = HomalgZeroMatrix(0, nr_cols, HomalgRing(mat))
+    for i = 1:(length(list))
+        row = mat[list[i]:list[i], :]
+        union_rows = UnionOfRows(HomalgRing(mat), nr_cols,[union_rows, row])
+    end
+    return union_rows
+end
+
+"""
     KroneckerMat(mat1, mat2)
 
 Return the Kronecker (or tensor) product of the two homalg matrices mat1 and mat2.
@@ -576,6 +636,6 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
     return AbstractAlgebra.kronecker_product(mat1, mat2)
 end
 
-export UnionOfRows, UnionOfColumns, KroneckerMat
+export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows
 
 end
