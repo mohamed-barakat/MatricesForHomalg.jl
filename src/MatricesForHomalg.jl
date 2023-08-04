@@ -288,7 +288,7 @@ julia> NumberRows(mat)
 2
 ```
 """
-function NumberRows(mat)::BigInt
+function NumberRows(mat)::Int64
     return AbstractAlgebra.nrows(mat)
 end
 
@@ -306,7 +306,7 @@ julia> NumberColumns(mat)
 3
 ```
 """
-function NumberColumns(mat)::BigInt
+function NumberColumns(mat)::Int64
     return AbstractAlgebra.ncols(mat)
 end
 
