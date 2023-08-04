@@ -718,6 +718,96 @@ function LeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg, String}
     end
 end
 
-export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows, RightDivide, LeftDivide
+"""
+    DecideZeroRows(mat1, mat2)
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> reduced_mat1 = DecideZeroRows(mat2, mat1)
+[0   1]
+[0   1]
+[0   1]
+
+julia> RightDivide(mat2, mat1)
+"fail"
+
+julia> RightDivide(mat2 - reduced_mat1, mat1)
+[-1   1   0]
+[-2   2   0]
+[-3   3   0]
+
+julia> DecideZeroRows(mat1, mat1)
+[0   0]
+[0   0]
+[0   0]
+
+julia> mat3 = HomalgMatrix([4, 6, 2, 2], 2, 2, ZZ)
+[4   6]
+[2   2]
+
+julia> DecideZeroRows(mat3, mat1)
+[0   0]
+[0   0]
+
+julia> DecideZeroRows(mat1, mat3)
+[1   0]
+[1   0]
+[1   0]
+```
+"""
+function DecideZeroRows(B,A)
+    #A,B are defined over the same ring
+    ring = HomalgRing(B)
+
+    nr_rows_A = NumberRows(A)
+    nr_rows_B = NumberRows(B)
+
+    #A,B have the same number of columns
+    nr_cols = NumberColumns(B)
+
+    null_mat_a = HomalgZeroMatrix(nr_rows_A, nr_rows_B, ring)
+    ident_mat_b = HomalgIdentityMatrix(nr_rows_B, ring)
+
+    list_of_matrices = [UnionOfRows(ring, nr_rows_B, [ident_mat_b, null_mat_a]), UnionOfRows(ring, nr_cols,[B, A])]
+    temp_mat = UnionOfColumns(ring, nr_rows_B + nr_rows_A,list_of_matrices)
+    resulting_mat = BasisOfRows(temp_mat)
+
+    return resulting_mat[1:nr_rows_B, nr_rows_B+1:nr_rows_B+nr_cols]
+end
+
+"""
+    DecideZeroRows(mat1, mat2)
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat3 = HomalgMatrix([3, 1, 7, 1, 11, 1], 3, 2, ZZ)
+[ 3   1]
+[ 7   1]
+[11   1]
+
+julia> DecideZeroColumns(mat3, mat1)
+[0   0]
+[0   0]
+[0   0]
+```
+"""
+function DecideZeroColumns(B, A)
+    return TransposedMatrix(DecideZeroRows(TransposedMatrix(B), TransposedMatrix(A)))
+end
+
+export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows, RightDivide, LeftDivide, DecideZeroRows, DecideZeroColumns
 
 end
