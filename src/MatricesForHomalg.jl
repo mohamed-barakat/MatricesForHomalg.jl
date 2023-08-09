@@ -751,7 +751,7 @@ julia> DecideZeroRows(mat1, mat3)
 [1   0]
 ```
 """
-function DecideZeroRows(B,A)
+function DecideZeroRows(B,A)::TypeOfMatrixForHomalg
     #A,B are defined over the same ring
     ring = HomalgRing(B)
 
@@ -791,7 +791,7 @@ julia> DecideZeroColumns(mat3, mat1)
 [0   0]
 ```
 """
-function DecideZeroColumns(B, A)
+function DecideZeroColumns(B, A)::TypeOfMatrixForHomalg
     return TransposedMatrix(DecideZeroRows(TransposedMatrix(B), TransposedMatrix(A)))
 end
 
