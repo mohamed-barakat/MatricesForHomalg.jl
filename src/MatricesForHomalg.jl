@@ -624,13 +624,153 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
 end
 
 """
+    SafeRightDivide(mat2, mat1)
+
+Returns: a homalg matrix
+
+Same as RightDivide, but asserts that the result is not fail.
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+[3   4]
+[5   6]
+[7   8]
+
+julia> SafeRightDivide(mat2, mat1)
+[ 0   1   0]
+[-1   2   0]
+[-2   3   0]
+
+julia> SafeRightDivide(mat1, mat2)
+[2   -1   0]
+[1    0   0]
+[0    1   0]
+
+julia> SafeRightDivide(mat2, mat2)
+[ 1   0   0]
+[ 0   1   0]
+[-1   2   0]
+
+julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
+[4   5]
+[6   7]
+[8   9]
+
+julia> SafeRightDivide(mat1, mat3)
+ERROR: Unable to solve linear system
+```
+"""
+function SafeRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
+    return AbstractAlgebra.solve_left(mat1, mat2)
+end
+
+"""
+    UniqueRightDivide(mat2, mat1)
+
+Returns: a homalg matrix
+
+Same as SafeRightDivide, but asserts that the solution is unique.
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+[3   4]
+[5   6]
+[7   8]
+
+julia> RightDivide(mat2, mat1)
+[ 0   1   0]
+[-1   2   0]
+[-2   3   0]
+
+julia> UniqueRightDivide(mat2, mat1)
+ERROR: The inhomogeneous linear system of equations X mat1=mat2 has no unique solution
+
+julia> mat=HomalgIdentityMatrix(3, ZZ)
+[1   0   0]
+[0   1   0]
+[0   0   1]
+
+julia> UniqueRightDivide(mat, mat)
+[1   0   0]
+[0   1   0]
+[0   0   1]
+```
+"""
+function UniqueRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
+
+    if NumberRows(BasisOfRows(mat1)) != NumberRows(mat1)
+        return Base.error("The inhomogeneous linear system of equations X mat1=mat2 has no unique solution")
+    end
+
+    return SafeRightDivide(mat2, mat1)
+end
+
+"""
     RightDivide(mat2, mat1)
 
 Returns: a homalg matrix or fail
 
 Let mat2 and mat1 be matrices having the same number of columns and defined over the same ring.
-The matrix RightDivide(mat2, mat1) is a particular solution of the inhomogeneous (one sided) linear system of equations X(mat1)=(mat2) in case it is solvable.
-Otherwise fail is returned. The name RightDivide suggests "X=(mat2)(mat1^(-1))".
+The matrix RightDivide(mat2, mat1) is a particular solution of the inhomogeneous (one sided) linear system of equations Xmat1=mat2 in case it is solvable.
+Otherwise fail is returned. The name RightDivide suggests "X=mat2mat1^-1".
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+[3   4]
+[5   6]
+[7   8]
+
+julia> RightDivide(mat2, mat1)
+[ 0   1   0]
+[-1   2   0]
+[-2   3   0]
+
+julia> RightDivide(mat1, mat2)
+[2   -1   0]
+[1    0   0]
+[0    1   0]
+
+julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
+[4   5]
+[6   7]
+[8   9]
+
+julia> RightDivide(mat1, mat3)
+"fail"
+
+julia> RightDivide(mat3, mat1)
+"fail"
+```
+"""
+function RightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return SafeRightDivide(mat2, mat1)
+    catch
+        return "fail"
+    end
+end
+
+"""
+    SafeLeftDivide(mat1, mat2)
+
+Returns: a homalg matrix
+
+Same as LeftDivide, but asserts that the result is not fail.
 
 ```jldoctest
 julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
@@ -643,21 +783,70 @@ julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
 [4   5]
 [6   7]
 
-julia> RightDivide(mat2, mat2)
-[ 1   0   0]
-[ 0   1   0]
-[-1   2   0]
+julia> mat3 = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
+[1   0]
+[0   0]
+[0   0]
 
-julia> RightDivide(mat2, mat1)
-"fail"
+julia> SafeLeftDivide(mat2, mat2)
+[1   0]
+[0   1]
+
+julia> SafeLeftDivide(mat1, mat2)
+[0   -1]
+[1    2]
+
+julia> SafeLeftDivide(mat3, mat2)
+ERROR: ArgumentError: Unable to solve linear system
 ```
 """
-function RightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg, String}
-    try
-        return AbstractAlgebra.solve_left(mat1, mat2)
-    catch y
-        return "fail"
+function SafeLeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg}
+    return AbstractAlgebra.solve(mat1, mat2)
+end
+
+"""
+    UniqueLeftDivide(mat1, mat2)
+
+Returns: a homalg matrix
+
+Same as SafeLeftDivide, but asserts that the solution is unique.
+
+```jldoctest
+julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> UniqueLeftDivide(mat2, mat2)
+[1   0]
+[0   1]
+
+julia> mat1 = HomalgMatrix([1,2,3,0,5,6,0,0,0], 3, 3, ZZ)
+[1   2   3]
+[0   5   6]
+[0   0   0]
+
+julia> mat2 = HomalgMatrix([1,2,0], 3, 1, ZZ)
+[1]
+[2]
+[0]
+
+julia> UniqueLeftDivide(mat1, mat2)
+ERROR: The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution
+```
+"""
+function UniqueLeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg}
+    
+    if NumberColumns(BasisOfColumns(mat1)) != NumberColumns(mat1)
+        return Base.error("The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution")
     end
+
+    return SafeLeftDivide(mat1, mat2)
 end
 
 """
@@ -666,8 +855,8 @@ end
 Returns: a homalg matrix or fail
 
 Let mat1 and mat2 be matrices having the same number of rows and defined over the same ring.
-The matrix LeftDivide(mat1, mat2) is a particular solution of the inhomogeneous (one sided) linear system of equations (mat1)X=(mat2) in case it is solvable.
-Otherwise fail is returned. The name LeftDivide suggests "X=((mat1)^-1)(mat2)".
+The matrix LeftDivide(mat1, mat2) is a particular solution of the inhomogeneous (one sided) linear system of equations mat1X= mat2 in case it is solvable.
+Otherwise fail is returned. The name LeftDivide suggests "X=mat1^{-1}mat2".
 
 ```jldoctest
 julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
@@ -795,6 +984,8 @@ function DecideZeroColumns(B, A)::TypeOfMatrixForHomalg
     return TransposedMatrix(DecideZeroRows(TransposedMatrix(B), TransposedMatrix(A)))
 end
 
-export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows, RightDivide, LeftDivide, DecideZeroRows, DecideZeroColumns
+export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows,
+    SafeRightDivide, UniqueRightDivide, RightDivide, SafeLeftDivide, UniqueLeftDivide, LeftDivide,
+    DecideZeroRows, DecideZeroColumns
 
 end
