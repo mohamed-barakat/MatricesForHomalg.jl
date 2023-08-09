@@ -378,7 +378,7 @@ end
 """
     RowReducedEchelonForm(mat)
 
-Return the reduced row-echelon form of the matrix mat.
+Return the reduced row-echelon form and the rank of the matrix mat.
 
 ```jldoctest
 julia> mat = HomalgMatrix(reverse(1:9), 3, 3, ZZ)
