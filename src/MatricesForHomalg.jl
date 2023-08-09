@@ -347,12 +347,7 @@ julia> ConvertMatrixToRow(mat)
 ```
 """
 function ConvertMatrixToRow(mat)::TypeOfMatrixForHomalg
-    union_rows = HomalgZeroMatrix(1, 0, HomalgRing(mat))
-    for i = 1:(NumberRows(mat))
-        row = mat[i:i, :]
-        union_rows = UnionOfColumns(HomalgRing(mat),1, [union_rows, row])
-    end
-    return union_rows
+    return UnionOfColumns(HomalgRing(mat), 1, map(i -> CertainRows(mat, i:i), 1:NumberRows(mat)))
 end
 
 """
@@ -377,13 +372,7 @@ julia> ConvertMatrixToColumn(mat)
 ```
 """
 function ConvertMatrixToColumn(mat)::TypeOfMatrixForHomalg
-    union_columns = HomalgZeroMatrix(0, 1, HomalgRing(mat))
-    #Problem: NumberColumns liefert falschen Datentyp
-    for i = 1:(NumberColumns(mat))
-        column = mat[:, i:i]
-        union_columns = UnionOfRows(HomalgRing(mat),1, [union_columns, column])
-    end
-    return union_columns
+    return UnionOfRows(HomalgRing(mat), 1, map(j -> CertainColumns(mat, [j]), 1:NumberColumns(mat)))
 end
 
 """
