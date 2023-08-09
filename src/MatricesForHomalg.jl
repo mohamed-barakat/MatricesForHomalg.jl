@@ -545,16 +545,15 @@ julia> CertainColumns(mat, [2, 2, 1])
 julia> CertainColumns(mat, [])
 2 by 0 empty matrix
 
+julia> CertainColumns(mat, 4:3)
+2 by 0 empty matrix
 ```
 """
 function CertainColumns(mat, list)::TypeOfMatrixForHomalg
-    nr_rows = NumberRows(mat)
-    union_columns = HomalgZeroMatrix(nr_rows, 0, HomalgRing(mat))
-    for i = 1:(length(list))
-        column = mat[:, list[i]:list[i]]
-        union_columns = UnionOfColumns(HomalgRing(mat), nr_rows,[union_columns, column])
+    if length(list) == 0
+        return HomalgZeroMatrix(NumberRows(mat), 0, HomalgRing(mat))
     end
-    return union_columns
+    return mat[:, list]
 end
 
 """
@@ -576,16 +575,15 @@ julia> CertainRows(mat, [2, 2, 1])
 julia> CertainRows(mat, [])
 0 by 2 empty matrix
 
+julia> CertainRows(mat, 4:3)
+0 by 2 empty matrix
 ```
 """
 function CertainRows(mat, list)::TypeOfMatrixForHomalg
-    nr_cols = NumberColumns(mat)
-    union_rows = HomalgZeroMatrix(0, nr_cols, HomalgRing(mat))
-    for i = 1:(length(list))
-        row = mat[list[i]:list[i], :]
-        union_rows = UnionOfRows(HomalgRing(mat), nr_cols,[union_rows, row])
+    if length(list) == 0
+        return HomalgZeroMatrix(0, NumberColumns(mat), HomalgRing(mat))
     end
-    return union_rows
+    return mat[list, :]
 end
 
 """
