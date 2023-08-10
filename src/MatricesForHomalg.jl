@@ -709,7 +709,7 @@ julia> UniqueRightDivide(mat, mat)
 function UniqueRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
 
     if NumberRows(BasisOfRows(mat1)) != NumberRows(mat1)
-        return Base.error("The inhomogeneous linear system of equations X mat1=mat2 has no unique solution")
+        error("The inhomogeneous linear system of equations X mat1=mat2 has no unique solution")
     end
 
     return SafeRightDivide(mat2, mat1)
@@ -843,7 +843,7 @@ ERROR: The inhomogeneous linear system of equations mat1 X=mat2 has no unique so
 function UniqueLeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg}
     
     if NumberColumns(BasisOfColumns(mat1)) != NumberColumns(mat1)
-        return Base.error("The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution")
+        error("The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution")
     end
 
     return SafeLeftDivide(mat1, mat2)
