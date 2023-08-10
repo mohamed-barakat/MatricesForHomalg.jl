@@ -621,8 +621,73 @@ function FirstZeroColumn(mat)::Int64
     return first_zero_column
 end
 
+"""
+    SyzygiesOfRows(mat)
+
+Return a homalg matrix.
+Let R be the ring over which M is defined (R:= HomalgRing( M )). The matrix of row syzygies SyzygiesGeneratorsOfRows( M ) is a matrix whose rows span the left kernel of M,
+i.e. the R-submodule of the free left module R(1xNrRows(M)) consisting of all rows X satisfying XM=0
+
+```jldoctest
+julia> mat = HomalgMatrix(4:9, 3, 2, ZZ)
+[4   5]
+[6   7]
+[8   9]
+
+julia> s = SyzygiesOfRows(mat)
+[1   -2   1]
+
+julia> s*mat
+[0   0]
+```
+"""
+function SyzygiesOfRows(A)::TypeOfMatrixForHomalg
+    ring = HomalgRing(A)
+    nr_rows = NumberRows(A)
+    nr_cols = NumberColumns(A)
+
+    ident_mat_a = HomalgIdentityMatrix(nr_rows, ring)
+
+    temp_mat = UnionOfColumns(ring, nr_rows, [A, ident_mat_a])
+
+    resulting_mat = BasisOfRows(temp_mat)
+
+    BA = resulting_mat[:, 1 : nr_cols]
+
+    s = FirstZeroRow(BA)
+
+    return resulting_mat[s:nr_rows, nr_cols + 1 : nr_cols + nr_rows]
+end
+
+"""
+    SyzygiesOfColumns(mat)
+
+Return a homalg matrix.
+Let R be the ring over which M is defined (R:=HomalgRing( M )). The matrix of column syzygies SyzygiesGeneratorsOfColumns( M ) is a matrix whose columns span the right kernel of M,
+i.e. the R-submodule of the free right module R(NrColumns(M)x1) consisting of all columns X satisfying MX=0
+
+```jldoctest
+julia> mat = TransposedMatrix(HomalgMatrix(4:9, 3, 2, ZZ))
+[4   6   8]
+[5   7   9]
+
+julia> s = SyzygiesOfColumns(mat)
+[ 1]
+[-2]
+[ 1]
+
+julia> mat*s
+[0]
+[0]
+```
+"""
+function SyzygiesOfColumns(A)::TypeOfMatrixForHomalg
+    return TransposedMatrix(SyzygiesOfRows(TransposedMatrix(A)))
+end
+
 export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn,
-    RowReducedEchelonForm, BasisOfRows, BasisOfColumns, ZeroRows, ZeroColumns, FirstZeroRow, FirstZeroColumn
+    RowReducedEchelonForm, BasisOfRows, BasisOfColumns, ZeroRows, ZeroColumns, FirstZeroRow, FirstZeroColumn,
+    SyzygiesOfRows, SyzygiesOfColumns
 
 ## Operations of homalg matrices
 
