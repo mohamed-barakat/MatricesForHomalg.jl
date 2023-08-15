@@ -990,7 +990,7 @@ julia> SafeRightDivide(mat1, mat3)
 ERROR: Unable to solve linear system
 ```
 """
-function SafeRightDivide(B, A)::Union{TypeOfMatrixForHomalg}
+function SafeRightDivide(B, A)::TypeOfMatrixForHomalg
     return SafeRightDivide(B, A, HomalgZeroMatrix(0, NumberColumns(A), HomalgRing(A)))
 end
 
