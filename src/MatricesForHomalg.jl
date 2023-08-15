@@ -849,35 +849,43 @@ Returns: a homalg matrix
 Same as RightDivide, but asserts that the result is not fail.
 
 ```jldoctest
-julia> a = HomalgMatrix(1:9, 3, 3, ZZ)
+julia> A = HomalgMatrix(1:9, 3, 3, ZZ)
 [1   2   3]
 [4   5   6]
 [7   8   9]
 
-julia> b = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
+julia> B = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
 [ 3    5    7]
 [13   16   19]
 [29   33   37]
 
-julia> l = HomalgMatrix(2:10, 3, 3, ZZ)
+julia> L = HomalgMatrix(2:10, 3, 3, ZZ)
 [2   3    4]
 [5   6    7]
 [8   9   10]
 
-julia> x = SafeRightDivide(b, a, l)
+julia> X = SafeRightDivide(B, A, L)
 [0   0   -2]
 [0   0   -1]
 [0   0    0]
 
-julia> y = HomalgMatrix([1, 3, 0, 0, 4, 0, -3, 7, 0], 3, 3, ZZ)
+julia> Y = HomalgMatrix([1, 3, 0, 0, 4, 0, -3, 7, 0], 3, 3, ZZ)
 [ 1   3   0]
 [ 0   4   0]
 [-3   7   0]
 
-julia> x*a+y*l
+julia> X*A+Y*L
 [ 3    5    7]
 [13   16   19]
 [29   33   37]
+
+julia> B = HomalgMatrix([3, 5, 7, 0, 16, 19, 0, 33, 37], 3, 3, ZZ)
+[3    5    7]
+[0   16   19]
+[0   33   37]
+
+julia> SafeRightDivide(B, A, L)
+ERROR: Unable to solve linear system
 ```
 """
 function SafeRightDivide(B, A, L)::TypeOfMatrixForHomalg
