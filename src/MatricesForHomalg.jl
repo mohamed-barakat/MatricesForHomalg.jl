@@ -927,22 +927,22 @@ Let B, A and L be matrices having the same number of columns and defined over th
 in case it is solvable (for some Y which is forgotten). Otherwise fail is returned. The name RightDivide suggests "X=BA−1 modulo L".
 
 ```jldoctest
-julia> a = HomalgMatrix(1:9, 3, 3, ZZ)
+julia> A = HomalgMatrix(1:9, 3, 3, ZZ)
 [1   2   3]
 [4   5   6]
 [7   8   9]
 
-julia> b = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
+julia> B = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
 [ 3    5    7]
 [13   16   19]
 [29   33   37]
 
-julia> l = HomalgMatrix(2:10, 3, 3, ZZ)
+julia> L = HomalgMatrix(2:10, 3, 3, ZZ)
 [2   3    4]
 [5   6    7]
 [8   9   10]
 
-julia> x = RightDivide(b, a, l)
+julia> X = RightDivide(B, A, L)
 [0   0   -2]
 [0   0   -1]
 [0   0    0]
@@ -964,37 +964,37 @@ Returns: a homalg matrix
 Same as RightDivide, but asserts that the result is not fail.
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+julia> B = HomalgMatrix(3:8, 3, 2, ZZ)
 [3   4]
 [5   6]
 [7   8]
 
-julia> SafeRightDivide(mat2, mat1)
+julia> SafeRightDivide(B, A)
 [0    1   0]
 [0    0   1]
 [0   -1   2]
 
-julia> SafeRightDivide(mat1, mat2)
+julia> SafeRightDivide(A, B)
 [0   3   -2]
 [0   2   -1]
 [0   1    0]
 
-julia> SafeRightDivide(mat2, mat2)
+julia> SafeRightDivide(B, B)
 [0   2   -1]
 [0   1    0]
 [0   0    1]
 
-julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
+julia> B = HomalgMatrix(4:9, 3, 2, ZZ)
 [4   5]
 [6   7]
 [8   9]
 
-julia> SafeRightDivide(mat1, mat3)
+julia> SafeRightDivide(A, B)
 ERROR: Unable to solve linear system
 ```
 """
@@ -1014,22 +1014,22 @@ Returns: a homalg matrix
 Same as SafeRightDivide, but asserts that the solution is unique.
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+julia> B = HomalgMatrix(3:8, 3, 2, ZZ)
 [3   4]
 [5   6]
 [7   8]
 
-julia> RightDivide(mat2, mat1)
+julia> RightDivide(B, A)
 [0    1   0]
 [0    0   1]
 [0   -1   2]
 
-julia> UniqueRightDivide(mat2, mat1)
+julia> UniqueRightDivide(B, A)
 ERROR: The inhomogeneous linear system of equations XA=B has no unique solution
 
 julia> mat = HomalgIdentityMatrix(3, ZZ)
@@ -1058,39 +1058,39 @@ end
 Returns: a homalg matrix or fail
 
 Let B and A be matrices having the same number of columns and defined over the same ring.
-The matrix RightDivide(B, A) is a particular solution of the inhomogeneous (one sided) linear system of equations Xmat1=mat2 in case it is solvable.
+The matrix RightDivide(B, A) is a particular solution of the inhomogeneous (one sided) linear system of equations XA=B in case it is solvable.
 Otherwise fail is returned. The name RightDivide suggests "X=BA^-1".
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
+julia> B = HomalgMatrix(3:8, 3, 2, ZZ)
 [3   4]
 [5   6]
 [7   8]
 
-julia> RightDivide(mat2, mat1)
+julia> RightDivide(B, A)
 [0    1   0]
 [0    0   1]
 [0   -1   2]
 
-julia> RightDivide(mat1, mat2)
+julia> RightDivide(A, B)
 [0   3   -2]
 [0   2   -1]
 [0   1    0]
 
-julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
+julia> C = HomalgMatrix(4:9, 3, 2, ZZ)
 [4   5]
 [6   7]
 [8   9]
 
-julia> RightDivide(mat1, mat3)
+julia> RightDivide(A, C)
 "fail"
 
-julia> RightDivide(mat3, mat1)
+julia> RightDivide(C, A)
 "fail"
 ```
 """
