@@ -842,6 +842,84 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
 end
 
 """
+    SafeRightDivide(B, A, L)
+
+Returns: a homalg matrix
+
+Same as RightDivide, but asserts that the result is not fail.
+
+```jldoctest
+julia> a = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> b = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
+[ 3    5    7]
+[13   16   19]
+[29   33   37]
+
+julia> l = HomalgMatrix(2:10, 3, 3, ZZ)
+[2   3    4]
+[5   6    7]
+[8   9   10]
+
+julia> x = SafeRightDivide(b, a, l)
+[0   0   -2]
+[0   0   -1]
+[0   0    0]
+
+julia> y = HomalgMatrix([1, 3, 0, 0, 4, 0, -3, 7, 0], 3, 3, ZZ)
+[ 1   3   0]
+[ 0   4   0]
+[-3   7   0]
+
+julia> x*a+y*l
+[ 3    5    7]
+[13   16   19]
+[29   33   37]
+```
+"""
+
+function SafeRightDivide(B, A, L)
+    ring = HomalgRing(A)
+    nr_cols = NumberColumns(A)
+    nr_rows_a = NumberRows(A)
+    nr_rows_b = NumberRows(B)
+    nr_rows_l = NumberRows(L)
+
+    ident_mat_b = HomalgIdentityMatrix(nr_rows_b, ring)
+    zero_mat_a = HomalgZeroMatrix(nr_rows_a, nr_rows_b, ring)
+    zero_mat_l = HomalgZeroMatrix(nr_rows_l, nr_rows_b, ring)
+
+    zero_mat_b = HomalgZeroMatrix(nr_rows_b, nr_rows_a, ring)
+    ident_mat_a = HomalgIdentityMatrix(nr_rows_a, ring)
+    zero_mat_l_2 = HomalgZeroMatrix(nr_rows_l, nr_rows_a, ring)
+
+    union_rows_ident_zero = UnionOfRows(ring, nr_rows_b, [ident_mat_b, zero_mat_a, zero_mat_l])
+    union_rows_zero_ident = UnionOfRows(ring, nr_rows_a, [zero_mat_b, ident_mat_a, zero_mat_l_2])
+    union_rows_a_b_l = UnionOfRows(ring, nr_cols, [B, A, L])
+
+    union_mat = UnionOfColumns(ring, nr_rows_a + nr_rows_b + nr_rows_l, [union_rows_ident_zero, union_rows_a_b_l, union_rows_zero_ident])
+    
+    temp_mat = RowReducedEchelonForm(union_mat)[1]
+    b′ = temp_mat[1:nr_rows_b, (nr_rows_b + 1) : (nr_rows_b + nr_cols)]
+
+    if b′ != 0
+        error("Unable to solve linear system")
+    end
+    return -temp_mat[1:nr_rows_b, (nr_rows_b + nr_cols +1) : NumberColumns(temp_mat)]
+end
+
+function RightDivide(B, A, L)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return SafeRightDivide(B, A, L)
+    catch
+        return "fail"
+    end
+end
+
+"""
     SafeRightDivide(mat2, mat1)
 
 Returns: a homalg matrix
