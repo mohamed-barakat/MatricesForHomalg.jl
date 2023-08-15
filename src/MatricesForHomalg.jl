@@ -1330,46 +1330,46 @@ function LeftDivide(A, B)::Union{TypeOfMatrixForHomalg, String}
 end
 
 """
-    DecideZeroRows(mat1, mat2)
+    DecideZeroRows(B, A)
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+julia> B = HomalgMatrix(2:7, 3, 2, ZZ)
 [2   3]
 [4   5]
 [6   7]
 
-julia> reduced_mat1 = DecideZeroRows(mat2, mat1)
+julia> A′ = DecideZeroRows(B, A)
 [0   1]
 [0   1]
 [0   1]
 
-julia> RightDivide(mat2, mat1)
+julia> RightDivide(B, A)
 "fail"
 
-julia> RightDivide(mat2 - reduced_mat1, mat1)
+julia> RightDivide(B - A′, A)
 [0   -1   1]
 [0   -2   2]
 [0   -3   3]
 
-julia> DecideZeroRows(mat1, mat1)
+julia> DecideZeroRows(A, A)
 [0   0]
 [0   0]
 [0   0]
 
-julia> mat3 = HomalgMatrix([4, 6, 2, 2], 2, 2, ZZ)
+julia> C = HomalgMatrix([4, 6, 2, 2], 2, 2, ZZ)
 [4   6]
 [2   2]
 
-julia> DecideZeroRows(mat3, mat1)
+julia> DecideZeroRows(C, A)
 [0   0]
 [0   0]
 
-julia> DecideZeroRows(mat1, mat3)
+julia> DecideZeroRows(A, C)
 [1   0]
 [1   0]
 [1   0]
@@ -1389,27 +1389,27 @@ function DecideZeroRows(B,A)::TypeOfMatrixForHomalg
     ident_mat_b = HomalgIdentityMatrix(nr_rows_B, ring)
 
     list_of_matrices = [UnionOfRows(ring, nr_rows_B, [ident_mat_b, null_mat_a]), UnionOfRows(ring, nr_cols,[B, A])]
-    temp_mat = UnionOfColumns(ring, nr_rows_B + nr_rows_A,list_of_matrices)
-    resulting_mat = BasisOfRows(temp_mat)
+    union_mat = UnionOfColumns(ring, nr_rows_B + nr_rows_A,list_of_matrices)
+    temp_mat = BasisOfRows(union_mat)
 
-    return resulting_mat[1:nr_rows_B, nr_rows_B+1:nr_rows_B+nr_cols]
+    return temp_mat[1:nr_rows_B, nr_rows_B+1:nr_rows_B+nr_cols]
 end
 
 """
-    DecideZeroRows(mat1, mat2)
+    DecideZeroRows(B, A)
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat3 = HomalgMatrix([3, 1, 7, 1, 11, 1], 3, 2, ZZ)
+julia> B = HomalgMatrix([3, 1, 7, 1, 11, 1], 3, 2, ZZ)
 [ 3   1]
 [ 7   1]
 [11   1]
 
-julia> DecideZeroColumns(mat3, mat1)
+julia> DecideZeroColumns(B, A)
 [0   0]
 [0   0]
 [0   0]
