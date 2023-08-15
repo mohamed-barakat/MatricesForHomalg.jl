@@ -880,7 +880,7 @@ julia> x*a+y*l
 [29   33   37]
 ```
 """
-function SafeRightDivide(B, A, L)
+function SafeRightDivide(B, A, L)::TypeOfMatrixForHomalg
     ring = HomalgRing(A)
     nr_cols = NumberColumns(A)
     nr_rows_a = NumberRows(A)
