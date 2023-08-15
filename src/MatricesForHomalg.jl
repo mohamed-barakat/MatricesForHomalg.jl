@@ -1111,129 +1111,219 @@ function RightDivide(B, A)::Union{TypeOfMatrixForHomalg, String}
 end
 
 """
-    SafeLeftDivide(mat1, mat2)
+    SafeLeftDivide(A, B, L)
 
 Returns: a homalg matrix
 
 Same as LeftDivide, but asserts that the result is not fail.
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+julia> L = HomalgMatrix(2:7, 3, 2, ZZ)
 [2   3]
 [4   5]
 [6   7]
 
-julia> mat3 = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
-[1   0]
+julia> B = HomalgMatrix([5, 5, 11, 9, 17, 13], 3, 2, ZZ)
+[ 5    5]
+[11    9]
+[17   13]
+
+julia> SafeLeftDivide(A, B, L)
 [0   0]
 [0   0]
 
-julia> SafeLeftDivide(mat2, mat2)
-[1   0]
-[0   1]
+julia> B = HomalgMatrix([3, 5, 0, 9, 11, 13], 3, 2, ZZ)
+[ 3    5]
+[ 0    9]
+[11   13]
 
-julia> SafeLeftDivide(mat1, mat2)
-[0   -1]
-[1    2]
-
-julia> SafeLeftDivide(mat3, mat2)
-ERROR: ArgumentError: Unable to solve linear system
+julia> SafeLeftDivide(A, B, L)
+ERROR: Unable to solve linear system
 ```
 """
-function SafeLeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg}
-    return AbstractAlgebra.solve(mat1, mat2)
+function SafeLeftDivide(A, B, L)::TypeOfMatrixForHomalg
+    return TransposedMatrix(SafeRightDivide(TransposedMatrix(B), TransposedMatrix(A), TransposedMatrix(L)))
 end
 
 """
-    UniqueLeftDivide(mat1, mat2)
+    LeftDivide(A, B, L)
+
+Returns: a homalg matrix or fail
+
+Let A, B and L be matrices having the same number of columns and defined over the same ring.
+The matrix LeftDivide( A, B, L ) is a particular solution of the inhomogeneous (one sided) linear system of equations AX+LY=B
+in case it is solvable (for some Y which is forgotten). Otherwise fail is returned. The name LeftDivide suggests "X=A−1B modulo L"
+
+```jldoctest
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> L = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> B = HomalgMatrix([5, 5, 11, 9, 17, 13], 3, 2, ZZ)
+[ 5    5]
+[11    9]
+[17   13]
+
+julia> LeftDivide(A, B, L)
+[0   0]
+[0   0]
+
+julia> B = HomalgMatrix([3, 5, 0, 9, 11, 13], 3, 2, ZZ)
+[ 3    5]
+[ 0    9]
+[11   13]
+
+julia> LeftDivide(A, B, L)
+"fail"
+```
+"""
+function LeftDivide(A, B, L)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return SafeLeftDivide(A, B, L)
+    catch y
+        return "fail"
+    end
+end
+
+"""
+    SafeLeftDivide(A, B)
+
+Returns: a homalg matrix
+
+Same as LeftDivide, but asserts that the result is not fail.
+
+```jldoctest
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> B = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> C = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
+[1   0]
+[0   0]
+[0   0]
+
+julia> SafeLeftDivide(B, B)
+[1   0]
+[0   1]
+
+julia> SafeLeftDivide(A, B)
+[0   -1]
+[1    2]
+
+julia> SafeLeftDivide(C, B)
+ERROR: Unable to solve linear system
+```
+"""
+function SafeLeftDivide(A, B)::TypeOfMatrixForHomalg
+    return SafeLeftDivide(A, B, HomalgZeroMatrix(NumberRows(A), 0, HomalgRing(A)))
+end
+
+#= function SafeLeftDivide(A, B)::Union{TypeOfMatrixForHomalg}
+    return AbstractAlgebra.solve(A, B)
+end =#
+
+"""
+    UniqueLeftDivide(A, B)
 
 Returns: a homalg matrix
 
 Same as SafeLeftDivide, but asserts that the solution is unique.
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+julia> B = HomalgMatrix(2:7, 3, 2, ZZ)
 [2   3]
 [4   5]
 [6   7]
 
-julia> UniqueLeftDivide(mat2, mat2)
+julia> UniqueLeftDivide(B, B)
 [1   0]
 [0   1]
 
-julia> mat1 = HomalgMatrix([1,2,3,0,5,6,0,0,0], 3, 3, ZZ)
+julia> A = HomalgMatrix([1,2,3,0,5,6,0,0,0], 3, 3, ZZ)
 [1   2   3]
 [0   5   6]
 [0   0   0]
 
-julia> mat2 = HomalgMatrix([1,2,0], 3, 1, ZZ)
+julia> B = HomalgMatrix([1,2,0], 3, 1, ZZ)
 [1]
 [2]
 [0]
 
-julia> UniqueLeftDivide(mat1, mat2)
-ERROR: The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution
+julia> UniqueLeftDivide(A, B)
+ERROR: The inhomogeneous linear system of equations AX=B has no unique solution
 ```
 """
-function UniqueLeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg}
+function UniqueLeftDivide(A, B)::TypeOfMatrixForHomalg
     
-    if NumberColumns(BasisOfColumns(mat1)) != NumberColumns(mat1)
-        error("The inhomogeneous linear system of equations mat1 X=mat2 has no unique solution")
+    if NumberColumns(BasisOfColumns(A)) != NumberColumns(A)
+        error("The inhomogeneous linear system of equations AX=B has no unique solution")
     end
 
-    return SafeLeftDivide(mat1, mat2)
+    return SafeLeftDivide(A, B)
 end
 
 """
-    LeftDivide(mat1, mat2)
+    LeftDivide(A, B)
 
 Returns: a homalg matrix or fail
 
-Let mat1 and mat2 be matrices having the same number of rows and defined over the same ring.
-The matrix LeftDivide(mat1, mat2) is a particular solution of the inhomogeneous (one sided) linear system of equations mat1X= mat2 in case it is solvable.
-Otherwise fail is returned. The name LeftDivide suggests "X=mat1^{-1}mat2".
+Let A and B be matrices having the same number of rows and defined over the same ring.
+The matrix LeftDivide(A, B) is a particular solution of the inhomogeneous (one sided) linear system of equations AX=B in case it is solvable.
+Otherwise fail is returned. The name LeftDivide suggests "X=A^{-1}B".
 
 ```jldoctest
-julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
 [3   4]
 [5   6]
 
-julia> mat2 = HomalgMatrix(2:7, 3, 2, ZZ)
+julia> B = HomalgMatrix(2:7, 3, 2, ZZ)
 [2   3]
 [4   5]
 [6   7]
 
-julia> mat3 = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
+julia> C = HomalgMatrix([1,0,0,0,0,0], 3, 2, ZZ)
 [1   0]
 [0   0]
 [0   0]
 
-julia> LeftDivide(mat2, mat2)
+julia> LeftDivide(B, B)
 [1   0]
 [0   1]
 
-julia> LeftDivide(mat1, mat2)
+julia> LeftDivide(A, B)
 [0   -1]
 [1    2]
 
-julia> LeftDivide(mat3, mat2)
+julia> LeftDivide(C, B)
 "fail"
 ```
 """
-function LeftDivide(mat1, mat2)::Union{TypeOfMatrixForHomalg, String}
+function LeftDivide(A, B)::Union{TypeOfMatrixForHomalg, String}
     try
-        return AbstractAlgebra.solve(mat1, mat2)
+        return SafeLeftDivide(A, B)
     catch y
         return "fail"
     end
