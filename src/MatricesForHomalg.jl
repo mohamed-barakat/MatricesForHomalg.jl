@@ -946,6 +946,14 @@ julia> X = RightDivide(B, A, L)
 [0   0   -2]
 [0   0   -1]
 [0   0    0]
+
+julia> B = HomalgMatrix([3, 5, 7, 0, 16, 19, 0, 33, 37], 3, 3, ZZ)
+[3    5    7]
+[0   16   19]
+[0   33   37]
+
+julia> RightDivide(B, A, L)
+"fail"
 ```
 """
 function RightDivide(B, A, L)::Union{TypeOfMatrixForHomalg, String}
