@@ -1332,6 +1332,12 @@ end
 """
     DecideZeroRows(B, A)
 
+    Returns: a homalg matrix
+
+Let A and B be matrices having the same number of columns and defined over the same ring R and S be the row span of B, i.e. the R-submodule of the free left module R(1×NrColumns(B)) spanned by the rows of B.
+The result is a matrix C having the same shape as A, for which the i-th row Ci is equivalent to the i-th row Ai of A modulo S, i.e. Ci−Ai is an element of the row span S of B.
+Moreover, the row Ci is zero, if and only if the row Ai is an element of S. So DecideZeroRows decides which rows of A are zero modulo the rows of B.
+
 ```jldoctest
 julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
 [1   2]
