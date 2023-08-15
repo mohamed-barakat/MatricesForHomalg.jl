@@ -880,7 +880,6 @@ julia> x*a+y*l
 [29   33   37]
 ```
 """
-
 function SafeRightDivide(B, A, L)
     ring = HomalgRing(A)
     nr_cols = NumberColumns(A)
@@ -911,6 +910,36 @@ function SafeRightDivide(B, A, L)
     return -temp_mat[1:nr_rows_b, (nr_rows_b + nr_cols +1) : NumberColumns(temp_mat)]
 end
 
+"""
+    RightDivide(B, A, L)
+
+Returns: a homalg matrix or fail
+
+Let B, A and L be matrices having the same number of columns and defined over the same ring. The matrix RightDivide( B, A, L ) is a particular solution of the inhomogeneous (one sided) linear system of equations XA+YL=B
+in case it is solvable (for some Y which is forgotten). Otherwise fail is returned. The name RightDivide suggests "X=BA−1 modulo L".
+
+```jldoctest
+julia> a = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> b = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
+[ 3    5    7]
+[13   16   19]
+[29   33   37]
+
+julia> l = HomalgMatrix(2:10, 3, 3, ZZ)
+[2   3    4]
+[5   6    7]
+[8   9   10]
+
+julia> x = RightDivide(b, a, l)
+[0   0   -2]
+[0   0   -1]
+[0   0    0]
+```
+"""
 function RightDivide(B, A, L)::Union{TypeOfMatrixForHomalg, String}
     try
         return SafeRightDivide(B, A, L)
