@@ -842,7 +842,85 @@ function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
 end
 
 """
-    SafeRightDivide(mat2, mat1)
+    SafeRightDivide(B, A, L)
+
+Returns: a homalg matrix
+
+Same as RightDivide, but asserts that the result is not fail.
+
+```jldoctest
+julia> a = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> b = HomalgMatrix([3, 5, 7, 13, 16, 19, 29, 33, 37], 3, 3, ZZ)
+[ 3    5    7]
+[13   16   19]
+[29   33   37]
+
+julia> l = HomalgMatrix(2:10, 3, 3, ZZ)
+[2   3    4]
+[5   6    7]
+[8   9   10]
+
+julia> x = SafeRightDivide(b, a, l)
+[0   0   -2]
+[0   0   -1]
+[0   0    0]
+
+julia> y = HomalgMatrix([1, 3, 0, 0, 4, 0, -3, 7, 0], 3, 3, ZZ)
+[ 1   3   0]
+[ 0   4   0]
+[-3   7   0]
+
+julia> x*a+y*l
+[ 3    5    7]
+[13   16   19]
+[29   33   37]
+```
+"""
+
+function SafeRightDivide(B, A, L)
+    ring = HomalgRing(A)
+    nr_cols = NumberColumns(A)
+    nr_rows_a = NumberRows(A)
+    nr_rows_b = NumberRows(B)
+    nr_rows_l = NumberRows(L)
+
+    ident_mat_b = HomalgIdentityMatrix(nr_rows_b, ring)
+    zero_mat_a = HomalgZeroMatrix(nr_rows_a, nr_rows_b, ring)
+    zero_mat_l = HomalgZeroMatrix(nr_rows_l, nr_rows_b, ring)
+
+    zero_mat_b = HomalgZeroMatrix(nr_rows_b, nr_rows_a, ring)
+    ident_mat_a = HomalgIdentityMatrix(nr_rows_a, ring)
+    zero_mat_l_2 = HomalgZeroMatrix(nr_rows_l, nr_rows_a, ring)
+
+    union_rows_ident_zero = UnionOfRows(ring, nr_rows_b, [ident_mat_b, zero_mat_a, zero_mat_l])
+    union_rows_zero_ident = UnionOfRows(ring, nr_rows_a, [zero_mat_b, ident_mat_a, zero_mat_l_2])
+    union_rows_a_b_l = UnionOfRows(ring, nr_cols, [B, A, L])
+
+    union_mat = UnionOfColumns(ring, nr_rows_a + nr_rows_b + nr_rows_l, [union_rows_ident_zero, union_rows_a_b_l, union_rows_zero_ident])
+    
+    temp_mat = RowReducedEchelonForm(union_mat)[1]
+    b′ = temp_mat[1:nr_rows_b, (nr_rows_b + 1) : (nr_rows_b + nr_cols)]
+
+    if b′ != 0
+        error("Unable to solve linear system")
+    end
+    return -temp_mat[1:nr_rows_b, (nr_rows_b + nr_cols +1) : NumberColumns(temp_mat)]
+end
+
+function RightDivide(B, A, L)::Union{TypeOfMatrixForHomalg, String}
+    try
+        return SafeRightDivide(B, A, L)
+    catch
+        return "fail"
+    end
+end
+
+"""
+    SafeRightDivide(B, A)
 
 Returns: a homalg matrix
 
@@ -860,19 +938,19 @@ julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
 [7   8]
 
 julia> SafeRightDivide(mat2, mat1)
-[ 0   1   0]
-[-1   2   0]
-[-2   3   0]
+[0    1   0]
+[0    0   1]
+[0   -1   2]
 
 julia> SafeRightDivide(mat1, mat2)
-[2   -1   0]
-[1    0   0]
-[0    1   0]
+[0   3   -2]
+[0   2   -1]
+[0   1    0]
 
 julia> SafeRightDivide(mat2, mat2)
-[ 1   0   0]
-[ 0   1   0]
-[-1   2   0]
+[0   2   -1]
+[0   1    0]
+[0   0    1]
 
 julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
 [4   5]
@@ -883,12 +961,16 @@ julia> SafeRightDivide(mat1, mat3)
 ERROR: Unable to solve linear system
 ```
 """
-function SafeRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
-    return AbstractAlgebra.solve_left(mat1, mat2)
+function SafeRightDivide(B, A)::Union{TypeOfMatrixForHomalg}
+    return SafeRightDivide(B, A, HomalgZeroMatrix(0, NumberColumns(A), HomalgRing(A)))
 end
 
+# function SafeRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
+#     return AbstractAlgebra.solve_left(mat1, mat2)
+# end
+
 """
-    UniqueRightDivide(mat2, mat1)
+    UniqueRightDivide(B, A)
 
 Returns: a homalg matrix
 
@@ -906,14 +988,14 @@ julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
 [7   8]
 
 julia> RightDivide(mat2, mat1)
-[ 0   1   0]
-[-1   2   0]
-[-2   3   0]
+[0    1   0]
+[0    0   1]
+[0   -1   2]
 
 julia> UniqueRightDivide(mat2, mat1)
-ERROR: The inhomogeneous linear system of equations X mat1=mat2 has no unique solution
+ERROR: The inhomogeneous linear system of equations XA=B has no unique solution
 
-julia> mat=HomalgIdentityMatrix(3, ZZ)
+julia> mat = HomalgIdentityMatrix(3, ZZ)
 [1   0   0]
 [0   1   0]
 [0   0   1]
@@ -924,23 +1006,23 @@ julia> UniqueRightDivide(mat, mat)
 [0   0   1]
 ```
 """
-function UniqueRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
+function UniqueRightDivide(B, A)::Union{TypeOfMatrixForHomalg}
 
-    if NumberRows(BasisOfRows(mat1)) != NumberRows(mat1)
-        error("The inhomogeneous linear system of equations X mat1=mat2 has no unique solution")
+    if NumberRows(BasisOfRows(A)) != NumberRows(A)
+        error("The inhomogeneous linear system of equations XA=B has no unique solution")
     end
 
-    return SafeRightDivide(mat2, mat1)
+    return SafeRightDivide(B, A)
 end
 
 """
-    RightDivide(mat2, mat1)
+    RightDivide(B, A)
 
 Returns: a homalg matrix or fail
 
-Let mat2 and mat1 be matrices having the same number of columns and defined over the same ring.
-The matrix RightDivide(mat2, mat1) is a particular solution of the inhomogeneous (one sided) linear system of equations Xmat1=mat2 in case it is solvable.
-Otherwise fail is returned. The name RightDivide suggests "X=mat2mat1^-1".
+Let B and A be matrices having the same number of columns and defined over the same ring.
+The matrix RightDivide(B, A) is a particular solution of the inhomogeneous (one sided) linear system of equations Xmat1=mat2 in case it is solvable.
+Otherwise fail is returned. The name RightDivide suggests "X=BA^-1".
 
 ```jldoctest
 julia> mat1 = HomalgMatrix(1:6, 3, 2, ZZ)
@@ -954,14 +1036,14 @@ julia> mat2 = HomalgMatrix(3:8, 3, 2, ZZ)
 [7   8]
 
 julia> RightDivide(mat2, mat1)
-[ 0   1   0]
-[-1   2   0]
-[-2   3   0]
+[0    1   0]
+[0    0   1]
+[0   -1   2]
 
 julia> RightDivide(mat1, mat2)
-[2   -1   0]
-[1    0   0]
-[0    1   0]
+[0   3   -2]
+[0   2   -1]
+[0   1    0]
 
 julia> mat3 = HomalgMatrix(4:9, 3, 2, ZZ)
 [4   5]
@@ -975,9 +1057,9 @@ julia> RightDivide(mat3, mat1)
 "fail"
 ```
 """
-function RightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg, String}
+function RightDivide(B, A)::Union{TypeOfMatrixForHomalg, String}
     try
-        return SafeRightDivide(mat2, mat1)
+        return SafeRightDivide(B, A)
     catch
         return "fail"
     end
@@ -1135,9 +1217,9 @@ julia> RightDivide(mat2, mat1)
 "fail"
 
 julia> RightDivide(mat2 - reduced_mat1, mat1)
-[-1   1   0]
-[-2   2   0]
-[-3   3   0]
+[0   -1   1]
+[0   -2   2]
+[0   -3   3]
 
 julia> DecideZeroRows(mat1, mat1)
 [0   0]
