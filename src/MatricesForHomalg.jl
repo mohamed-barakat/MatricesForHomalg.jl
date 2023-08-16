@@ -622,22 +622,22 @@ function FirstZeroColumn(mat)::Int64
 end
 
 """
-    SyzygiesOfRows(mat)
+    SyzygiesOfRows(A)
 
 Return a homalg matrix.
-Let R be the ring over which M is defined (R:= HomalgRing( M )). The matrix of row syzygies SyzygiesGeneratorsOfRows( M ) is a matrix whose rows span the left kernel of M,
-i.e. the R-submodule of the free left module R(1xNrRows(M)) consisting of all rows X satisfying XM=0
+Let R be the ring over which A is defined (R:= HomalgRing(A)). The matrix of row syzygies SyzygiesGeneratorsOfRows(A) is a matrix whose rows span the left kernel of A,
+i.e. the R-submodule of the free left module R(1xNrRows(A)) consisting of all rows X satisfying XA=0
 
 ```jldoctest
-julia> mat = HomalgMatrix(4:9, 3, 2, ZZ)
+julia> A = HomalgMatrix(4:9, 3, 2, ZZ)
 [4   5]
 [6   7]
 [8   9]
 
-julia> s = SyzygiesOfRows(mat)
+julia> S = SyzygiesOfRows(A)
 [1   -2   1]
 
-julia> s*mat
+julia> S*A
 [0   0]
 ```
 """
@@ -660,23 +660,23 @@ function SyzygiesOfRows(A)::TypeOfMatrixForHomalg
 end
 
 """
-    SyzygiesOfColumns(mat)
+    SyzygiesOfColumns(A)
 
 Return a homalg matrix.
-Let R be the ring over which M is defined (R:=HomalgRing( M )). The matrix of column syzygies SyzygiesGeneratorsOfColumns( M ) is a matrix whose columns span the right kernel of M,
-i.e. the R-submodule of the free right module R(NrColumns(M)x1) consisting of all columns X satisfying MX=0
+Let R be the ring over which A is defined (R:=HomalgRing(A)). The matrix of column syzygies SyzygiesGeneratorsOfColumns(A) is a matrix whose columns span the right kernel of A,
+i.e. the R-submodule of the free right module R(NrColumns(A)x1) consisting of all columns X satisfying AX=0
 
 ```jldoctest
-julia> mat = TransposedMatrix(HomalgMatrix(4:9, 3, 2, ZZ))
+julia> A = TransposedMatrix(HomalgMatrix(4:9, 3, 2, ZZ))
 [4   6   8]
 [5   7   9]
 
-julia> s = SyzygiesOfColumns(mat)
+julia> S = SyzygiesOfColumns(A)
 [ 1]
 [-2]
 [ 1]
 
-julia> mat*s
+julia> A*S
 [0]
 [0]
 ```
