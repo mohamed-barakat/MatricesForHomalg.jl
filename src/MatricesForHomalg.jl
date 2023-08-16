@@ -1435,6 +1435,78 @@ function DecideZeroColumns(B, A)::TypeOfMatrixForHomalg
     return TransposedMatrix(DecideZeroRows(TransposedMatrix(B), TransposedMatrix(A)))
 end
 
+"""
+    SyzygiesOfRows(A, N)
+
+    Returns: a homalg matrix
+
+Let R be the ring over which A is defined. The matrix of relative row syzygies SyzygiesOfRows(A, N) is a matrix whose rows span the left kernel of A modulo N,
+i.e. the R-submodule of the free left module R(1×NrRows(A)) consisting of all rows K satisfying KA+LN=0 for some row L∈R(1×NrRows(N)).
+
+```jldoctest
+julia> A = HomalgMatrix(1:9, 3, 3, ZZ)
+[1   2   3]
+[4   5   6]
+[7   8   9]
+
+julia> N = HomalgMatrix(2:10, 3, 3, ZZ)
+[2   3    4]
+[5   6    7]
+[8   9   10]
+
+julia> SyzygiesOfRows(A, N)
+[1   0   2]
+[0   1   2]
+[0   0   3]
+
+julia> SyzygiesOfRows(A,A)
+[1   0   0]
+[0   1   0]
+[0   0   1]
+```
+"""
+function SyzygiesOfRows(A, N)
+    ring = HomalgRing(A)
+    nr_cols = NumberColumns(A)
+    union_a_n = UnionOfRows(ring, nr_cols, [A, N])
+    ident_a = HomalgIdentityMatrix(NumberRows(A), ring)
+    zero_n = HomalgZeroMatrix(NumberRows(N), NumberRows(A), ring)
+    union_mat = UnionOfColumns(ring, NumberRows(A) + NumberRows(N), [union_a_n, UnionOfRows(ring, NumberRows(A), [ident_a, zero_n])])
+    temp_mat = RowReducedEchelonForm(union_mat)[1]
+
+    first_zero_row = FirstZeroRow(temp_mat[:, 1:nr_cols])
+    first_zero_row_2 = FirstZeroRow(temp_mat)
+    return temp_mat[first_zero_row : (first_zero_row_2-1), (nr_cols +1) : (nr_cols + NumberRows(A))]
+end
+
+"""
+    SyzygiesOfColumns(A, N)
+
+    Returns: a homalg matrix
+
+Let R be the ring over which M is defined. The matrix of relative column syzygies SyzygiesOfColumns(A,N) is a matrix whose columns span the right kernel of A modulo N,
+i.e. the R-submodule of the free right module R(NrColumns(A)×1)consisting of all columns K satisfying AK+NL=0 for some column L∈R(NrColumns(N)×1).
+
+```jldoctest
+julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
+[1   2]
+[3   4]
+[5   6]
+
+julia> N = HomalgMatrix(2:7, 3, 2, ZZ)
+[2   3]
+[4   5]
+[6   7]
+
+julia> SyzygiesOfColumns(A, N)
+[1   0]
+[0   1]
+```
+"""
+function SyzygiesOfColumns(A, N)
+    return TransposedMatrix(SyzygiesOfRows(TransposedMatrix(A), TransposedMatrix(N)))
+end
+
 export UnionOfRows, UnionOfColumns, KroneckerMat, CertainColumns, CertainRows,
     SafeRightDivide, UniqueRightDivide, RightDivide, SafeLeftDivide, UniqueLeftDivide, LeftDivide,
     DecideZeroRows, DecideZeroColumns
