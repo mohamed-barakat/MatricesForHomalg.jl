@@ -1334,9 +1334,11 @@ end
 
     Returns: a homalg matrix
 
-Let A and B be matrices having the same number of columns and defined over the same ring R and S be the row span of B, i.e. the R-submodule of the free left module R(1×NrColumns(B)) spanned by the rows of B.
-The result is a matrix C having the same shape as A, for which the i-th row Ci is equivalent to the i-th row Ai of A modulo S, i.e. Ci−Ai is an element of the row span S of B.
-Moreover, the row Ci is zero, if and only if the row Ai is an element of S. So DecideZeroRows decides which rows of A are zero modulo the rows of B.
+Let B and A be matrices having the same number of columns and defined over the same ring R and S be the row span of A,
+i.e. the R-submodule of the free left module R(1×NrColumns(A)) spanned by the rows of A.
+The result is a matrix B′ having the same shape as B, for which the i-th row B′^i is equivalent to the i-th row B^i of B modulo S,
+i.e. B′^i−B^i is an element of the row span S of A.
+Moreover, the row B′^i is zero, if and only if the row B^i is an element of S. So DecideZeroRows decides which rows of B are zero modulo the rows of A.
 
 ```jldoctest
 julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
@@ -1402,7 +1404,15 @@ function DecideZeroRows(B,A)::TypeOfMatrixForHomalg
 end
 
 """
-    DecideZeroRows(B, A)
+    DecideZeroColumns(B, A)
+
+    Returns: a homalg matrix
+
+Let B and A be matrices having the same number of rows and defined over the same ring R and S be the column span of A,
+i.e. the R-submodule of the free right module R(NrRows(A)×1) spanned by the columns of A.
+The result is a matrix B′ having the same shape as B, for which the i-th column B′_i is equivalent to the i-th column B_i of B modulo S,
+i.e. B′_i−B_i is an element of the column span S of A. Moreover, the column B′_i is zero, if and only if the column B_i is an element of S.
+So DecideZeroColumns decides which columns of B are zero modulo the columns of A.
 
 ```jldoctest
 julia> A = HomalgMatrix(1:6, 3, 2, ZZ)
