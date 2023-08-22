@@ -10,6 +10,67 @@ import AbstractAlgebra: ZZ, QQ, matrix
 
 export ZZ, QQ
 
+## Constructors of homalg rings
+
+TypeOfRingForHomalg = AbstractAlgebra.NCRing
+
+"""
+    HomalgRingOfIntegers()
+
+Returns the ring of (rational) integers.
+
+```jldoctest
+julia> ring = HomalgRingOfIntegers()
+Integers
+```
+"""
+function HomalgRingOfIntegers()::AbstractAlgebra.Integers{BigInt}
+    return AbstractAlgebra.ZZ
+end
+
+"""
+    HomalgFieldOfRationals()
+
+Returns the field of rationals.
+
+```jldoctest
+julia> field = HomalgFieldOfRationals()
+Rationals
+```
+"""
+function HomalgFieldOfRationals()::AbstractAlgebra.Rationals{BigInt}
+    return AbstractAlgebra.QQ
+end
+
+"""
+    RingName(ring)
+
+Returns the name of the ring as a string.
+
+```jldoctest
+julia> ring = HomalgRingOfIntegers()
+Integers
+
+julia> RingName(ring)
+"Z"
+
+julia> field = HomalgFieldOfRationals()
+Rationals
+
+julia> RingName(field)
+"Q"
+```
+"""
+function RingName(field_of_rationals::AbstractAlgebra.Rationals{BigInt})::String
+    return "Q"
+end
+
+function RingName(ring_of_integers::AbstractAlgebra.Integers{BigInt})::String
+    return "Z"
+end
+
+export HomalgRingOfIntegers, HomalgFieldOfRationals, RingName
+
 ## Constructors of homalg matrices
 
 TypeOfMatrixForHomalg = AbstractAlgebra.Generic.MatSpaceElem
