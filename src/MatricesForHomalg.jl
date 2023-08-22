@@ -799,10 +799,28 @@ function ColumnRankOfMatrix(mat)::Int64
     RowRankOfMatrix(mat)
 end
 
+"""
+    StringDisplay(mat)
+
+Returns the matrix mat as a string.
+
+```jldoctest
+julia> mat = HomalgMatrix(4:9, 3, 2, ZZ)
+[4   5]
+[6   7]
+[8   9]
+
+julia> StringDisplay(mat)
+"[4 5; 6 7; 8 9]"
+```
+"""
+function StringDisplay(mat)::String
+    string(mat)
+end
 
 export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn,
     RowReducedEchelonForm, BasisOfRows, BasisOfColumns, ZeroRows, ZeroColumns, FirstZeroRow, FirstZeroColumn,
-    SyzygiesOfRows, SyzygiesOfColumns, RowRankOfMatrix, ColumnRankOfMatrix
+    SyzygiesOfRows, SyzygiesOfColumns, RowRankOfMatrix, ColumnRankOfMatrix, StringDisplay
 
 ## Operations of homalg matrices
 
