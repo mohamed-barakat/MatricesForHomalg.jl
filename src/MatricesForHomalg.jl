@@ -746,9 +746,63 @@ function SyzygiesOfColumns(A)::TypeOfMatrixForHomalg
     return TransposedMatrix(SyzygiesOfRows(TransposedMatrix(A)))
 end
 
+"""
+    RowRankOfMatrix(mat)
+
+Returns the row rank of the matrix mat as a nonnegative integer.
+
+```jldoctest
+julia> mat1 = HomalgMatrix(4:9, 3, 2, ZZ)
+[4   5]
+[6   7]
+[8   9]
+
+julia> RowRankOfMatrix(mat1)
+2
+
+julia> mat2 = HomalgIdentityMatrix(3, ZZ)
+[1   0   0]
+[0   1   0]
+[0   0   1]
+
+julia> RowRankOfMatrix(mat2)
+3
+```
+"""
+function RowRankOfMatrix(mat)::Int64
+    RowReducedEchelonForm(mat)[2]
+end
+
+"""
+    ColumnRankOfMatrix(mat)
+
+Returns the column rank of the matrix mat as a nonnegative integer.
+
+```jldoctest
+julia> mat1 = TransposedMatrix(HomalgMatrix(4:9, 3, 2, ZZ))
+[4   6   8]
+[5   7   9]
+
+julia> ColumnRankOfMatrix(mat1)
+2
+
+julia> mat2 = HomalgIdentityMatrix(3, ZZ)
+[1   0   0]
+[0   1   0]
+[0   0   1]
+
+julia> ColumnRankOfMatrix(mat2)
+3
+```
+"""
+function ColumnRankOfMatrix(mat)::Int64
+    RowRankOfMatrix(mat)
+end
+
+
 export HomalgRing, NumberRows, NumberColumns, TransposedMatrix, ConvertMatrixToRow, ConvertMatrixToColumn,
     RowReducedEchelonForm, BasisOfRows, BasisOfColumns, ZeroRows, ZeroColumns, FirstZeroRow, FirstZeroColumn,
-    SyzygiesOfRows, SyzygiesOfColumns
+    SyzygiesOfRows, SyzygiesOfColumns, RowRankOfMatrix, ColumnRankOfMatrix
 
 ## Operations of homalg matrices
 
