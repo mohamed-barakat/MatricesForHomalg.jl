@@ -10,9 +10,9 @@ import AbstractAlgebra: ZZ, QQ, matrix
 
 export ZZ, QQ
 
-TypeOfMatrixForHomalg = AbstractAlgebra.Generic.MatSpaceElem
-
 ## Constructors of homalg matrices
+
+TypeOfMatrixForHomalg = AbstractAlgebra.Generic.MatSpaceElem
 
 """
     HomalgMatrix(L, r, c, R)
