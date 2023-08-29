@@ -14,6 +14,8 @@ export ZZ, QQ
 
 TypeOfRingForHomalg = AbstractAlgebra.NCRing
 
+TypeOfFieldForHomalg = AbstractAlgebra.Field
+
 """
     HomalgRingOfIntegers()
 
