@@ -16,6 +16,8 @@ TypeOfRingForHomalg = AbstractAlgebra.NCRing
 
 TypeOfFieldForHomalg = AbstractAlgebra.Field
 
+TypeOfRingElementForHomalg = AbstractAlgebra.NCRingElement
+
 """
     HomalgRingOfIntegers()
 
