@@ -5,18 +5,18 @@ module MatricesForHomalg
 
 import Base: getindex
 
-import AbstractAlgebra
-import AbstractAlgebra: ZZ, QQ, matrix
+import Nemo
+import Nemo: ZZ, QQ, matrix
 
 export ZZ, QQ
 
 ## Constructors of homalg rings
 
-TypeOfRingForHomalg = AbstractAlgebra.NCRing
+TypeOfRingForHomalg = Nemo.NCRing
 
-TypeOfFieldForHomalg = AbstractAlgebra.Field
+TypeOfFieldForHomalg = Nemo.Field
 
-TypeOfRingElementForHomalg = AbstractAlgebra.NCRingElement
+TypeOfRingElementForHomalg = Nemo.NCRingElement
 
 """
     HomalgRingOfIntegers()
@@ -25,11 +25,11 @@ Returns the ring of (rational) integers.
 
 ```jldoctest
 julia> ring = HomalgRingOfIntegers()
-Integers
+Integer ring
 ```
 """
-function HomalgRingOfIntegers()::AbstractAlgebra.Integers{BigInt}
-    return AbstractAlgebra.ZZ
+function HomalgRingOfIntegers()::Nemo.ZZRing
+    return Nemo.ZZ
 end
 
 """
@@ -39,11 +39,11 @@ Returns the field of rationals.
 
 ```jldoctest
 julia> field = HomalgFieldOfRationals()
-Rationals
+Rational field
 ```
 """
-function HomalgFieldOfRationals()::AbstractAlgebra.Rationals{BigInt}
-    return AbstractAlgebra.QQ
+function HomalgFieldOfRationals()::Nemo.QQField
+    return Nemo.QQ
 end
 
 """
@@ -53,23 +53,23 @@ Returns the name of the ring as a string.
 
 ```jldoctest
 julia> ring = HomalgRingOfIntegers()
-Integers
+Integer ring
 
 julia> RingName(ring)
 "Z"
 
 julia> field = HomalgFieldOfRationals()
-Rationals
+Rational field
 
 julia> RingName(field)
 "Q"
 ```
 """
-function RingName(field_of_rationals::AbstractAlgebra.Rationals{BigInt})::String
+function RingName(field_of_rationals::Nemo.QQField)::String
     return "Q"
 end
 
-function RingName(ring_of_integers::AbstractAlgebra.Integers{BigInt})::String
+function RingName(ring_of_integers::Nemo.ZZRing)::String
     return "Z"
 end
 
@@ -77,7 +77,7 @@ export HomalgRingOfIntegers, HomalgFieldOfRationals, RingName
 
 ## Constructors of homalg matrices
 
-TypeOfMatrixForHomalg = AbstractAlgebra.Generic.MatSpaceElem
+TypeOfMatrixForHomalg = Nemo.MatrixElem
 
 """
     HomalgMatrix(L, r, c, R)
@@ -114,7 +114,7 @@ julia> mat = HomalgIdentityMatrix(3, ZZ)
 ```
 """
 function HomalgIdentityMatrix(r, R)::TypeOfMatrixForHomalg
-    return AbstractAlgebra.identity_matrix(R, r)
+    return Nemo.identity_matrix(R, r)
 end
 
 """
@@ -130,7 +130,7 @@ julia> mat = HomalgZeroMatrix(3, 2, ZZ)
 ```
 """
 function HomalgZeroMatrix(r, c, R)::TypeOfMatrixForHomalg
-    return AbstractAlgebra.zero_matrix(R, r, c)
+    return Nemo.zero_matrix(R, r, c)
 end
 
 """
@@ -212,7 +212,7 @@ julia> mat = HomalgDiagonalMatrix(1:5, ZZ)
 ```
 """
 function HomalgDiagonalMatrix(diagonal_entries, R)::TypeOfMatrixForHomalg
-    return AbstractAlgebra.block_diagonal_matrix(map(a->HomalgMatrix([a],1,1,R), diagonal_entries))
+    return Nemo.block_diagonal_matrix(map(a->HomalgMatrix([a],1,1,R), diagonal_entries))
 end
 
 """
@@ -226,18 +226,18 @@ julia> mat = HomalgMatrix([1,2,3,4,5,6], 2, 3, ZZ)
 [4   5   6]
 
 julia> QQ * mat
-[1//1   2//1   3//1]
-[4//1   5//1   6//1]
+[1   2   3]
+[4   5   6]
 
 julia> qmat = QQ * mat
-[1//1   2//1   3//1]
-[4//1   5//1   6//1]
+[1   2   3]
+[4   5   6]
 
 julia> ZZ * qmat == mat
 true
 ```
 """
-Base.:*(R, mat) = AbstractAlgebra.change_base_ring(R, mat)
+Base.:*(R, mat) = Nemo.change_base_ring(R, mat)
 
 export HomalgMatrix, HomalgIdentityMatrix, HomalgZeroMatrix, HomalgRowVector, HomalgColumnVector, HomalgDiagonalMatrix
 
@@ -259,7 +259,7 @@ true
 ```
 """
 function IsOne(mat)::Bool
-    return AbstractAlgebra.isone(mat)
+    return NumberRows(mat) == NumberColumns(mat) && Nemo.Nemo.isone(mat) ## the precondition fixes a bug in Nemo 0.48.0
 end
 
 """
@@ -278,7 +278,7 @@ true
 ```
 """
 function IsZero(mat)::Bool
-    return AbstractAlgebra.iszero(mat)
+    return Nemo.iszero(mat)
 end
 
 """
@@ -314,7 +314,7 @@ true
 ```
 """
 function IsSymmetricMatrix(mat)::Bool
-    return AbstractAlgebra.is_symmetric(mat)
+    return Nemo.is_symmetric(mat)
 end
 
 export IsOne, IsZero, IsEmptyMatrix, IsSymmetricMatrix
@@ -332,18 +332,18 @@ julia> mat = HomalgMatrix(1:6, 2, 3, ZZ)
 [4   5   6]
 
 julia> HomalgRing(mat)
-Integers
+Integer ring
 
 julia> mat = HomalgMatrix(1:6, 2, 3, QQ)
-[1//1   2//1   3//1]
-[4//1   5//1   6//1]
+[1   2   3]
+[4   5   6]
 
 julia> HomalgRing(mat)
-Rationals
+Rational field
 ```
 """
 function HomalgRing(mat)
-    return AbstractAlgebra.base_ring(mat)
+    return Nemo.base_ring(mat)
 end
 
 """
@@ -361,7 +361,7 @@ julia> NumberRows(mat)
 ```
 """
 function NumberRows(mat)::Int64
-    return AbstractAlgebra.nrows(mat)
+    return Nemo.nrows(mat)
 end
 
 """
@@ -379,7 +379,7 @@ julia> NumberColumns(mat)
 ```
 """
 function NumberColumns(mat)::Int64
-    return AbstractAlgebra.ncols(mat)
+    return Nemo.ncols(mat)
 end
 
 """
@@ -462,21 +462,21 @@ julia> RowReducedEchelonForm(mat)
 ([3 0 -3; 0 1 2; 0 0 0], 2)
 
 julia> mat = HomalgMatrix(reverse(1:9), 3, 3, QQ)
-[9//1   8//1   7//1]
-[6//1   5//1   4//1]
-[3//1   2//1   1//1]
+[9   8   7]
+[6   5   4]
+[3   2   1]
 
 julia> RowReducedEchelonForm(mat)
 ([1 0 -1; 0 1 2; 0 0 0], 2)
 """
-function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{BigInt})::Tuple{TypeOfMatrixForHomalg, Int64}
-    hnf = AbstractAlgebra.hnf(mat)
-    rank = AbstractAlgebra.rank(hnf)
+function RowReducedEchelonForm(mat::Nemo.ZZMatrix)::Tuple{TypeOfMatrixForHomalg, Int64}
+    hnf = Nemo.hnf(mat)
+    rank = Nemo.rank(hnf)
     return hnf, rank
 end
 
-function RowReducedEchelonForm(mat::AbstractAlgebra.Generic.MatSpaceElem{Rational{BigInt}})::Tuple{TypeOfMatrixForHomalg, Int64}
-    rank, rref = AbstractAlgebra.rref(mat)
+function RowReducedEchelonForm(mat::Nemo.QQMatrix)::Tuple{TypeOfMatrixForHomalg, Int64}
+    rank, rref = Nemo.rref(mat)
     return rref, rank
 end
 
@@ -496,13 +496,13 @@ julia> BasisOfRows(mat)
 [0   3   6]
 
 julia> mat = HomalgMatrix(1:9, 3, 3, QQ)
-[1//1   2//1   3//1]
-[4//1   5//1   6//1]
-[7//1   8//1   9//1]
+[1   2   3]
+[4   5   6]
+[7   8   9]
 
 julia> BasisOfRows(mat)
-[1//1   0//1   -1//1]
-[0//1   1//1    2//1]
+[1   0   -1]
+[0   1    2]
 ```
 """
 function BasisOfRows(mat)::TypeOfMatrixForHomalg
@@ -527,14 +527,14 @@ julia> BasisOfColumns(mat)
 [1   6]
 
 julia> mat = HomalgMatrix(1:9, 3, 3, QQ)
-[1//1   2//1   3//1]
-[4//1   5//1   6//1]
-[7//1   8//1   9//1]
+[1   2   3]
+[4   5   6]
+[7   8   9]
 
 julia> BasisOfColumns(mat)
-[ 1//1   0//1]
-[ 0//1   1//1]
-[-1//1   2//1]
+[ 1   0]
+[ 0   1]
+[-1   2]
 ```
 """
 function BasisOfColumns(mat)::TypeOfMatrixForHomalg
@@ -982,7 +982,7 @@ julia> KroneckerMat(mat2, mat1)
 ```
 """
 function KroneckerMat(mat1, mat2)::TypeOfMatrixForHomalg
-    return AbstractAlgebra.kronecker_product(mat1, mat2)
+    return Nemo.kronecker_product(mat1, mat2)
 end
 
 """
@@ -1155,7 +1155,7 @@ function SafeRightDivide(B, A)::TypeOfMatrixForHomalg
 end
 
 # function SafeRightDivide(mat2, mat1)::Union{TypeOfMatrixForHomalg}
-#     return AbstractAlgebra.solve_left(mat1, mat2)
+#     return Nemo.solve_left(mat1, mat2)
 # end
 
 """
@@ -1380,7 +1380,7 @@ function SafeLeftDivide(A, B)::TypeOfMatrixForHomalg
 end
 
 #= function SafeLeftDivide(A, B)::Union{TypeOfMatrixForHomalg}
-    return AbstractAlgebra.solve(A, B)
+    return Nemo.solve(A, B)
 end =#
 
 """
