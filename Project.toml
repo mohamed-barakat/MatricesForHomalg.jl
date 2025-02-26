@@ -1,13 +1,13 @@
 name = "MatricesForHomalg"
 uuid = "29b9b1b6-efa6-450e-8188-a5a2c25df071"
 authors = ["Mohamed Barakat <mohamed.barakat@uni-siegen.de>", "Johanna Knecht <johanna.knecht@student.uni-siegen.de>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Nemo = "2edaba10-b0f1-5616-af89-8c11ac63239a"
 
 [compat]
-Nemo = "0.48.0"
+Nemo = "0.48.0, 0.49"
 julia = "1.9, 1.10, 1.11"
 
 [extras]
