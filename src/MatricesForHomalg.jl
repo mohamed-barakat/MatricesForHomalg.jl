@@ -114,7 +114,7 @@ julia> mat = HomalgIdentityMatrix(3, ZZ)
 ```
 """
 function HomalgIdentityMatrix(r, R)::TypeOfMatrixForHomalg
-    return Nemo.identity_matrix(R, r)
+    return Nemo.identity_matrix(R, Int(r))
 end
 
 """
@@ -915,7 +915,7 @@ function CertainColumns(mat, list)::TypeOfMatrixForHomalg
     if length(list) == 0
         return HomalgZeroMatrix(NumberRows(mat), 0, HomalgRing(mat))
     end
-    return mat[:, list]
+    return mat[:, map(x->Int(x), list)]
 end
 
 """
@@ -945,7 +945,7 @@ function CertainRows(mat, list)::TypeOfMatrixForHomalg
     if length(list) == 0
         return HomalgZeroMatrix(0, NumberColumns(mat), HomalgRing(mat))
     end
-    return mat[list, :]
+    return mat[map(x->Int(x), list), :]
 end
 
 """
